@@ -1,11 +1,11 @@
 {
-  "name": "bonesnode",
+  "name": "packrip",
   "version": "1.0.0",
   "engines": {
     "node": "12.18.3",
     "npm": "6.14.6"
   },
-  "description": "Bones dice game.",
+  "description": "Pokemon TCG pack ripping simulator.",
   "main": "./server/app.js",
   "scripts": {
     "build": "gulp build",
