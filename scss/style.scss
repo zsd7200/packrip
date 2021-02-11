@@ -1,0 +1,66 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background-color: white;
+    color: black;
+    transition: .5s;
+    overflow-x: hidden;
+}
+h1 { text-align: center; }
+
+/* MARK: - Loading icon modified from loading.io */
+#lds-ring {
+    display: inline-block;
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: .5s;
+    
+    div {
+        box-sizing: border-box;
+        display: block;
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        margin: 8px;
+        border: 4px solid;
+        border-radius: 50%;
+        animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        border-color: black black black black;
+        background: linear-gradient(#D1545B 0, #D1545B 47.5%, #000000 47.5%, #000000 52.5%, #DFE0ED 52.5%, #DFE0ED 100%);
+        
+        &:nth-child(1) {
+            width: 15px;
+            height: 15px;
+            position: absolute;
+            z-index: 1001;
+            border: 2px solid;
+            background: #DFE0ED;
+            top: 24px;
+            left: 24px;
+        }
+    }
+}
+
+@keyframes lds-ring {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* MARK: - "Hidden" Class */
+.hidden {
+    opacity: 0;
+    display: none;
+}
+
+/* MARK: - Media Queries for different screen sizes - */
+@media only screen and (max-width: 760px) {
+}
+
+@media only screen and (max-width: 800px) {
+}
