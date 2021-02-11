@@ -49,6 +49,10 @@ h1 {
   100% {
     transform: rotate(360deg); } }
 
+/* MARK: - Cards - */
+.card {
+  border-radius: 7px; }
+
 /* MARK: - "Hidden" Class */
 .hidden {
   opacity: 0;
