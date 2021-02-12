@@ -140,6 +140,13 @@ h1 { text-align: center; }
     transform-origin: top-left;
 }
 
+.price {
+    padding: 10px;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 10px;
+}
+
 @keyframes shine {
     0% { transform: translateX(-300px) skewX(-15deg); }
     100% { transform: translateX(300px) skewX(-15deg); }

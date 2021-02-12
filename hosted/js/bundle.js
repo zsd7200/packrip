@@ -343,7 +343,8 @@ window.onload = function () {
           p.innerHTML += "Apologies for the inconvenience.";
         }
 
-        p.style.zIndex = 1000; // append to flexbox
+        p.style.zIndex = 1000;
+        p.classList.add("price"); // append to flexbox
 
         parent.appendChild(p);
       }

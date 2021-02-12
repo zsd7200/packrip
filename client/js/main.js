@@ -329,6 +329,7 @@ window.onload = () => {
                 }
                 
                 p.style.zIndex = 1000;
+                p.classList.add("price");
                 
                 // append to flexbox
                 parent.appendChild(p);
