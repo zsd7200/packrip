@@ -75,6 +75,20 @@ io.on('connection', (socket) => {
       .then((response) => { socket.emit('get-set', response.data.data, setID); })
       .catch((err) => { socket.emit('error', err); });
   });
+
+  socket.on('get-energies', () => {
+    const reqOptions = {
+      method: 'GET',
+      url: 'https://api.pokemontcg.io/v2/cards?q=set.id:sm1',
+      headers: {
+        'x-api-key': key,
+      },
+    };
+
+    axios(reqOptions)
+      .then((response) => { socket.emit('get-energies', response.data.data); })
+      .catch((err) => { socket.emit('error', err); });
+  });
 });
 
 http.listen(port, (err) => {

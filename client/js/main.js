@@ -9,16 +9,23 @@ window.onload = () => {
     let setDropdown = document.querySelector("#sets");
     let setSubmit = document.querySelector("#set-submit");
     let pack = document.querySelector("#pack");
+    const lsKey = "zsdpackrip-";
+    let smEnergies = (localStorage.getItem(lsKey + "smEnergy")) ? JSON.parse(localStorage.getItem(lsKey + "smEnergy")) : [];
     let setData = {};
     let setIDs = [];
     let currSet = {};
     let currSetID = "";
-    const lsKey = "zsdpackrip-";
     
     // get setIDs upon load
     socket.on('start', (sets) => {
         setData = JSON.parse(sets);
-        setIDs = Object.keys(setData);
+        setIDs = Object.keys(setData).filter((set) => {
+            // filter out promos, mcdonalds sets, and POP series sets
+            if(setData[set].indexOf("Promo") > -1 || setData[set].indexOf("McDonald") > -1 || setData[set].indexOf("POP") > -1)
+                return false;
+            else
+                return true;
+        });
         
         for(let i = 0; i < setIDs.length; i++) {
             let option = document.createElement("option");
@@ -34,9 +41,13 @@ window.onload = () => {
             if(localStorage.getItem(lsKey + "selection"))
                 setDropdown.value = localStorage.getItem(lsKey + "selection");
         } else
-            console.log("error");
+            console.log("error, could not get data from server");
         
         loading.classList.add("hidden");
+        
+        // emit this to stores energies from sun and moon base set from server
+        if(smEnergies.length == 0)
+            socket.emit('get-energies');
     });
     
     // store last pack selection
@@ -59,6 +70,14 @@ window.onload = () => {
         }
     };
     
+    // energy storage
+    socket.on('get-energies', (data) => {
+        for(let i = 164; i < data.length; i++)
+            smEnergies.push(data[i]);
+        
+        localStorage.setItem(lsKey + "smEnergy", JSON.stringify(smEnergies));
+    });
+    
     // hide loading icon and set localstorage data
     socket.on('get-set', (data, setID) => {
         loading.classList.add("hidden");
@@ -77,36 +96,99 @@ window.onload = () => {
     let showCards = () => {
         // empty array to hold current pack
         let packArr = [];
-        for(let i = 0; i < 10; i++) {
-            let energy = false;
-            let rand = random(0, currSet.length);
+        
+        // divide current set by rarities
+        let currSetComm = currSet.filter((card) => { return card.rarity == "Common"; });
+        let currSetUncomm = currSet.filter((card) => { return card.rarity == "Uncommon"; });
+        let currSetRare = currSet.filter((card) => { return card.rarity == "Rare"; });
+        let currSetHolo = currSet.filter((card) => { return card.rarity == "Rare Holo"; });
+        let currSetV = currSet.filter((card) => { return card.rarity == "Rare Holo V"; });
+        let currSetVMax = currSet.filter((card) => { return card.rarity == "Rare Holo VMAX"; });
+        let currSetUlt = currSet.filter((card) => { return card.rarity == "Rare Ultra"; });
+        let currSetRain = currSet.filter((card) => { return card.rarity == "Rare Rainbow"; });
+        let currSetSec = currSet.filter((card) => { return card.rarity == "Rare Secret"; });
+        let currSetAmaz = currSet.filter((card) => { return card.rarity == "Amazing Rare"; });
+        
+        // check for duplicate cards
+        let dupeCheck = (currPack, set) => {
+            let dupe, rand;
             
-            /*
-            // guarantee only one energy
-            if(i == 10) {
-                while(!energy) {
-                    if(currSet[rand].supertype == "Energy") {
-                        energy = true;
-                        console.log(currSet[rand]);
-                    } else
-                        rand = random(0, currSet.length);
+            // loops until dupe is false
+            do {
+                dupe = false;
+                rand = random(0, set.length);
+                
+                for(let i = 0; i < currPack.length; i++) {
+                    if(currPack[i] == set[rand]) {
+                        dupe = true;
+                        break;
+                    }
                 }
-            } else {
-                do {
-                    if(currSet[rand].supertype == "Energy") {
-                        energy = true;
-                        rand = random(0, currSet.length);
-                    } else
-                        energy = false;
-                } while(energy);
-            }
-            */
-            // Most sets don't come with their own energies, so 
-            // some detective work needs to be done to find out
-            // what sets have the standard energy cards, and
-            // when to use them.
+            } while(dupe);
             
-            packArr.push(currSet[rand]);
+            // return card
+            return set[rand];
+        };
+        
+        let randCard = (set) => { return set[random(0, set.length)]; };
+        
+        switch(currSetID) {
+            default:
+                for(let i = 0; i < 11; i++)
+                    packArr.push(randCard(currSet));
+                break;
+            case "swsh4":                                               // vivid voltage data from https://cardzard.com/blogs/news/vivid-voltage-pull-rate-data
+                const comm = random(0, 5) + 4;                          // at least 4 commons
+                const uncom = 8 - comm;                                 // remainder with uncommons
+                const amazing = (random(0, 20) == 0) ? true : false;    // 1/20 chance for amazing
+                
+                // fill up common and uncommon slots
+                for(let i = 0; i < comm; i++)
+                    packArr.push(dupeCheck(packArr, currSetComm));
+                
+                for(let i = 0; i < uncom; i++)
+                    packArr.push(dupeCheck(packArr, currSetUncomm));
+                
+                // shuffle array order
+                shuffle(packArr);
+                
+                // reverse slot
+                if(amazing)
+                    packArr.push(randCard(currSetAmaz));
+                else if(random(0, 2184) < 1313) {                       // 60% chance for reverse slot rare
+                    if(random(0, 2184) < 366)                           // 17% chance for reverse slot holo rare
+                        packArr.push(randCard(currSetHolo));
+                    else
+                        packArr.push(randCard(currSetRare));
+                } 
+                else if(random(0, 3) == 0)                              // 1/3 chance for uncommon reverse slot over common, this one is a guess
+                    packArr.push(randCard(currSetUncomm));
+                else
+                    packArr.push(randCard(currSetComm));
+                
+                // rare slot
+                if(random(0, 2184) < 23)                                // 1.05% chance for golden
+                    packArr.push(randCard(currSetSec));
+                else if(random(0, 2184) < 31)                           // 1.42% chance for rainbow
+                    packArr.push(randCard(currSetRain));
+                else if(random(0, 2184) < 89)                           // 4.07% chance for ultra rare
+                    packArr.push(randCard(currSetUlt));
+                else if(random(0, 2184) < 91)                           // 4.17% chance for VMAX
+                    packArr.push(randCard(currSetVMax));
+                else if(random(0, 2184) < 271)                          // 12.41 chance for V
+                    packArr.push(randCard(currSetV));
+                else if(random(0, 2184) < 366)                          // 16.76% chance for holo
+                    packArr.push(randCard(currSetHolo));
+                else
+                    packArr.push(randCard(currSetRare));
+                
+                // energies from VV are supposed to be from swsh base set
+                // but the TCG API doesn't have these energies available,
+                // so we're using sm energies instead
+                packArr.unshift(randCard(smEnergies));
+                
+                break;
+            
         }
         
         // clear pack innerHTML and 
