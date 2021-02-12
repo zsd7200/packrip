@@ -290,8 +290,7 @@ window.onload = () => {
                 let highestIndex = 0;
                 let price = 0;
                 
-                // start at 1 to skip energy
-                for(let i = 1; i < packArr.length; i++) {
+                for(let i = 0; i < packArr.length; i++) {
                     // start from holofoil and work down
                     try {
                         if((packArr[i].tcgplayer.prices.holofoil && i == packArr.length - 1) || (!packArr[i].tcgplayer.prices.reverseHolofoil && i == packArr.length - 2)) {
@@ -306,16 +305,30 @@ window.onload = () => {
                                 highest = packArr[i].tcgplayer.prices.reverseHolofoil.market;
                                 highestIndex = i;
                             }
-                        } else if(packArr[i].tcgplayer.prices.normal.market) {
+                        } else if(packArr[i].tcgplayer.prices.normal) {
                             price += packArr[i].tcgplayer.prices.normal.market;
                             if(packArr[i].tcgplayer.prices.normal.market > highest) {
                                 highest = packArr[i].tcgplayer.prices.normal.market;
                                 highestIndex = i;
                             }
+                        } else if(packArr[i].tcgplayer.prices.holofoil) {                       // this check is a fallback for sets that are still 100% randomized
+                            price += packArr[i].tcgplayer.prices.holofoil.market;
+                            if(packArr[i].tcgplayer.prices.holofoil.market > highest) {
+                                highest = packArr[i].tcgplayer.prices.holofoil.market;
+                                highestIndex = i;
+                            }
                         }
                     }
                     catch(err) {
-                        noPrices = true;
+                        // to prevent this from being thrown on energy cards
+                        if(packArr[i].supertype != "Energy")
+                            noPrices = true;
+                        
+                        // tcgplayer price debugging
+                        //console.log("Error on card: " + i);
+                        //console.log(packArr[i]);
+                        //console.log(err);
+                        continue;
                     }
                 }
                 

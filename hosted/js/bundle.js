@@ -302,9 +302,9 @@ window.onload = function () {
         var noPrices = false;
         var highest = 0;
         var highestIndex = 0;
-        var price = 0; // start at 1 to skip energy
+        var price = 0;
 
-        for (var _i5 = 1; _i5 < packArr.length; _i5++) {
+        for (var _i5 = 0; _i5 < packArr.length; _i5++) {
           // start from holofoil and work down
           try {
             if (packArr[_i5].tcgplayer.prices.holofoil && _i5 == packArr.length - 1 || !packArr[_i5].tcgplayer.prices.reverseHolofoil && _i5 == packArr.length - 2) {
@@ -321,16 +321,30 @@ window.onload = function () {
                 highest = packArr[_i5].tcgplayer.prices.reverseHolofoil.market;
                 highestIndex = _i5;
               }
-            } else if (packArr[_i5].tcgplayer.prices.normal.market) {
+            } else if (packArr[_i5].tcgplayer.prices.normal) {
               price += packArr[_i5].tcgplayer.prices.normal.market;
 
               if (packArr[_i5].tcgplayer.prices.normal.market > highest) {
                 highest = packArr[_i5].tcgplayer.prices.normal.market;
                 highestIndex = _i5;
               }
+            } else if (packArr[_i5].tcgplayer.prices.holofoil) {
+              // this check is a fallback for sets that are still 100% randomized
+              price += packArr[_i5].tcgplayer.prices.holofoil.market;
+
+              if (packArr[_i5].tcgplayer.prices.holofoil.market > highest) {
+                highest = packArr[_i5].tcgplayer.prices.holofoil.market;
+                highestIndex = _i5;
+              }
             }
           } catch (err) {
-            noPrices = true;
+            // to prevent this from being thrown on energy cards
+            if (packArr[_i5].supertype != "Energy") noPrices = true; // tcgplayer price debugging
+            //console.log("Error on card: " + i);
+            //console.log(packArr[i]);
+            //console.log(err);
+
+            continue;
           }
         } // update innerhtml for new p element
 
