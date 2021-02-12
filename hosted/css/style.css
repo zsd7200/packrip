@@ -17,10 +17,10 @@ h1 {
   width: 80px;
   height: 80px;
   z-index: 1000;
+  transition: .5s;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  transition: .5s; }
+  transform: translate(-50%, -50%); }
   #lds-ring div {
     box-sizing: border-box;
     display: block;
@@ -51,13 +51,23 @@ h1 {
 
 /* MARK: - Cards - */
 .card {
+  position: absolute;
   display: inline-block;
   border-radius: 7px;
-  padding-right: 10px; }
+  padding-right: 10px;
+  cursor: pointer;
+  animation: tilt 1s infinite;
+  transition: .5s; }
+
+.seen-card {
+  position: absolute;
+  animation: none;
+  left: 10px;
+  cursor: pointer; }
 
 /* Shine effect modified from: https://codepen.io/paigen11/pen/VwKZGMp */
 .holo {
-  position: relative;
+  position: absolute;
   overflow: hidden;
   z-index: 100; }
   .holo::before {
@@ -93,15 +103,68 @@ h1 {
   border-bottom: 4px solid #FFE165;
   border-radius: 7px; }
 
+.booster-container {
+  position: relative;
+  padding: 20px;
+  height: auto;
+  width: auto;
+  cursor: pointer;
+  transition: .5s;
+  text-align: center;
+  z-index: 10; }
+
+.booster-art {
+  height: 400px;
+  width: auto;
+  animation: tilt .5s infinite; }
+
+.zoom {
+  animation: zoom 1s forwards;
+  transform-origin: top-left; }
+
 @keyframes shine {
   0% {
     transform: translateX(-300px) skewX(-15deg); }
   100% {
     transform: translateX(300px) skewX(-15deg); } }
 
-/* MARK: - "Hidden" Class */
+@keyframes tilt {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  35% {
+    -webkit-transform: rotate(3deg);
+    transform: rotate(3deg); }
+  65% {
+    -webkit-transform: rotate(-3deg);
+    transform: rotate(-3deg); }
+  100% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); } }
+
+@keyframes zoom {
+  0% {
+    transform: scale(1);
+    opacity: 100; }
+  90% {
+    opacity: 75%; }
+  100% {
+    transform: scale(5);
+    opacity: 0; } }
+
+/* MARK: - Other - */
+.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 80vh; }
+
 .hidden {
   opacity: 0;
-  display: none; }
+  display: none;
+  visibility: hidden;
+  transition: .5s; }
 
 /* MARK: - Media Queries for different screen sizes - */

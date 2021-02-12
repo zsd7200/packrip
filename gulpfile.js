@@ -63,7 +63,7 @@ const webpTask = (done) => {
 
 // gulp.parallel has all of the paramter functions run simulatenously
 // this is okay because none of them depend on each other
-module.exports.build = gulp.parallel(sassTask, jsTask, lintTask); //, webpTask);
+module.exports.build = gulp.parallel(sassTask, jsTask, lintTask, webpTask);
 // webpTask is commented out because it only really needs to be ran once
 
 // create a watch script

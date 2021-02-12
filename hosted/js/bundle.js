@@ -11,6 +11,7 @@ window.onload = function () {
   var setSubmit = document.querySelector("#set-submit");
   var pack = document.querySelector("#pack");
   var lsKey = "zsdpackrip-";
+  var packArtDir = "assets/img/packs/";
   var smEnergies = localStorage.getItem(lsKey + "smEnergy") ? JSON.parse(localStorage.getItem(lsKey + "smEnergy")) : [];
   var setData = {};
   var setIDs = [];
@@ -81,8 +82,7 @@ window.onload = function () {
 
   socket.on('error', function (err) {
     console.log(err);
-  }); // currently just gets 10 random cards
-  // (should be set to 11 with energies)
+  }); // generate packs and display them
 
   var showCards = function showCards() {
     // empty array to hold current pack
@@ -118,7 +118,9 @@ window.onload = function () {
     });
     var currSetAmaz = currSet.filter(function (card) {
       return card.rarity == "Amazing Rare";
-    }); // check for duplicate cards
+    }); // for use later
+
+    var boosterArt = ""; // check for duplicate cards
 
     var dupeCheck = function dupeCheck(currPack, set) {
       var dupe, rand; // loops until dupe is false
@@ -196,23 +198,154 @@ window.onload = function () {
     } // clear pack innerHTML and 
 
 
-    pack.innerHTML = "";
+    pack.innerHTML = ""; // check if image for booster exists
+    // otherwise, use default image
 
-    for (var _i3 = 0; _i3 < packArr.length; _i3++) {
+    var getBoosterArt = function getBoosterArt() {
+      var img = new Image();
+
+      img.onload = function () {
+        showBoosterArt(packArtDir + currSetID + ".webp");
+      };
+
+      img.onerror = function () {
+        showBoosterArt(packArtDir + "default.webp");
+      };
+
+      img.src = packArtDir + currSetID + ".webp";
+    }; // called with correct source after finding out what src to use
+
+
+    var showBoosterArt = function showBoosterArt(imgSrc) {
+      var flex = document.createElement('div');
       var div = document.createElement('div');
       var img = document.createElement('img');
-      div.classList.add("card");
-      img.src = packArr[_i3].images.small;
+      flex.classList.add("center");
+      div.classList.add("holo");
+      div.classList.add("booster-container");
+      img.classList.add("booster-art");
+      img.src = imgSrc;
 
-      if (currSetID === "swsh4") {
-        if (_i3 == 0) img.classList.add("sm-energy"); // add holo class to reverse and end holo
+      flex.onclick = function () {
+        open(flex, div);
+      };
 
-        if (holo && _i3 == packArr.length - 1 || _i3 == packArr.length - 2) div.classList.add("holo");
-      }
-
+      flex.appendChild(div);
       div.appendChild(img);
-      pack.appendChild(div);
-    }
+      pack.appendChild(flex);
+    }; // run getBooster art
+
+
+    getBoosterArt();
+
+    var open = function open(parent, child) {
+      // remove event handler on parent
+      parent.onclick = false; // zoom child in
+
+      child.classList.add("zoom"); // format pack
+
+      var _loop = function _loop(_i3) {
+        var div = document.createElement('div');
+        var img = document.createElement('img');
+        div.classList.add("card");
+        div.classList.add("hidden");
+        div.style.zIndex = packArr.length - _i3;
+        img.src = packArr[_i3].images.small;
+
+        if (currSetID === "swsh4") {
+          if (_i3 == 0) img.classList.add("sm-energy"); // add holo class to reverse and end holo
+
+          if (holo && _i3 == packArr.length - 1 || _i3 == packArr.length - 2) div.classList.add("holo");
+        }
+
+        div.onclick = function () {
+          moveCard(_i3, parent);
+        };
+
+        div.appendChild(img);
+        parent.appendChild(div);
+      };
+
+      for (var _i3 = 0; _i3 < packArr.length; _i3++) {
+        _loop(_i3);
+      } // remove child and show cards
+
+
+      setTimeout(function () {
+        child.remove();
+
+        for (var _i4 = 0; _i4 < parent.childNodes.length; _i4++) {
+          parent.childNodes[_i4].classList.remove("hidden");
+        }
+      }, 500);
+    };
+
+    var moveCard = function moveCard(cardIndex, parent) {
+      // move the card over to the left by adding seen card class
+      parent.childNodes[cardIndex].classList.add("seen-card");
+      parent.childNodes[cardIndex].style.zIndex = packArr.length + cardIndex; // add new onclick handler to put it back on the pile
+
+      parent.childNodes[cardIndex].onclick = function () {
+        parent.childNodes[cardIndex].classList.remove("seen-card");
+        parent.childNodes[cardIndex].style.zIndex = packArr.length - cardIndex;
+
+        parent.childNodes[cardIndex].onclick = function () {
+          moveCard(cardIndex, parent);
+        };
+      }; // get price of pack based on TCGPlayer market price
+
+
+      if (cardIndex == packArr.length - 1) {
+        var p = document.createElement('p');
+        var noPrices = false;
+        var highest = 0;
+        var highestIndex = 0;
+        var price = 0; // start at 1 to skip energy
+
+        for (var _i5 = 1; _i5 < packArr.length; _i5++) {
+          // start from holofoil and work down
+          try {
+            if (packArr[_i5].tcgplayer.prices.holofoil && _i5 == packArr.length - 1 || !packArr[_i5].tcgplayer.prices.reverseHolofoil && _i5 == packArr.length - 2) {
+              price += packArr[_i5].tcgplayer.prices.holofoil.market;
+
+              if (packArr[_i5].tcgplayer.prices.holofoil.market > highest) {
+                highest = packArr[_i5].tcgplayer.prices.holofoil.market;
+                highestIndex = _i5;
+              }
+            } else if (packArr[_i5].tcgplayer.prices.reverseHolofoil && _i5 == packArr.length - 2) {
+              price += packArr[_i5].tcgplayer.prices.reverseHolofoil.market;
+
+              if (packArr[_i5].tcgplayer.prices.reverseHolofoil.market > highest) {
+                highest = packArr[_i5].tcgplayer.prices.reverseHolofoil.market;
+                highestIndex = _i5;
+              }
+            } else if (packArr[_i5].tcgplayer.prices.normal.market) {
+              price += packArr[_i5].tcgplayer.prices.normal.market;
+
+              if (packArr[_i5].tcgplayer.prices.normal.market > highest) {
+                highest = packArr[_i5].tcgplayer.prices.normal.market;
+                highestIndex = _i5;
+              }
+            }
+          } catch (err) {
+            noPrices = true;
+          }
+        } // update innerhtml for new p element
+
+
+        if (!noPrices) {
+          p.innerHTML = "Your pack is worth: <b>$" + price.toFixed(2) + "</b>.<br>";
+          p.innerHTML += "Your best hit was: <b>" + packArr[highestIndex].name + "</b> at <b>$" + highest.toFixed(2) + "</b>.";
+        } else {
+          p.innerHTML = "This pack is missing at least one card on TCGPlayer, and therefore cannot be valued. <br>";
+          p.innerHTML += "Apologies for the inconvenience.";
+        }
+
+        p.style.zIndex = 1000; // append to flexbox
+
+        parent.appendChild(p);
+      }
+    };
   };
 };
 /*
