@@ -249,7 +249,7 @@ window.onload = function () {
         var img = document.createElement('img');
         div.classList.add("card");
         div.classList.add("hidden");
-        div.style.zIndex = packArr.length - _i3;
+        div.style.zIndex = 100 - _i3;
         img.src = packArr[_i3].images.small;
 
         if (currSetID === "swsh4") {
@@ -287,9 +287,9 @@ window.onload = function () {
       parent.childNodes[cardIndex].style.zIndex = packArr.length + cardIndex; // add new onclick handler to put it back on the pile
 
       parent.childNodes[cardIndex].onclick = function () {
-        p.remove();
+        if (p) p.remove();
+        parent.childNodes[cardIndex].style.zIndex = 100 - cardIndex;
         parent.childNodes[cardIndex].classList.remove("seen-card");
-        parent.childNodes[cardIndex].style.zIndex = packArr.length - cardIndex;
 
         parent.childNodes[cardIndex].onclick = function () {
           moveCard(cardIndex, parent);

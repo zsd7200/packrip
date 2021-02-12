@@ -240,7 +240,7 @@ window.onload = () => {
                 let img = document.createElement('img');
                 div.classList.add("card");
                 div.classList.add("hidden");
-                div.style.zIndex = packArr.length - i;
+                div.style.zIndex = 100 - i;
                 img.src = packArr[i].images.small;
                 
                 if(currSetID === "swsh4") {
@@ -274,9 +274,11 @@ window.onload = () => {
             
             // add new onclick handler to put it back on the pile
             parent.childNodes[cardIndex].onclick = () => {
-                p.remove();
+                if(p)
+                    p.remove();
+                
+                parent.childNodes[cardIndex].style.zIndex = 100 - cardIndex;
                 parent.childNodes[cardIndex].classList.remove("seen-card");
-                parent.childNodes[cardIndex].style.zIndex = packArr.length - cardIndex;
                 parent.childNodes[cardIndex].onclick = () => { moveCard(cardIndex, parent); };
             };
             
