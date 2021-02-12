@@ -1,3 +1,5 @@
+$card-border: #FFE165;
+
 body {
     margin: 0;
     padding: 0;
@@ -56,6 +58,7 @@ h1 { text-align: center; }
 .card {
     display: inline-block;
     border-radius: 7px;
+    padding-right: 10px;
 }
 
 /* Shine effect modified from: https://codepen.io/paigen11/pen/VwKZGMp */
@@ -94,6 +97,14 @@ h1 { text-align: center; }
             animation: shine 2s infinite;
             animation-delay: .8s;
         }
+}
+
+.sm-energy {
+    background-color: $card-border;
+    border: 6px solid $card-border;
+    border-top: 8px solid $card-border;
+    border-bottom: 4px solid $card-border;
+    border-radius: 7px;
 }
 
 @keyframes shine {

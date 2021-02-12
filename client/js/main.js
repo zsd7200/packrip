@@ -201,9 +201,14 @@ window.onload = () => {
             div.classList.add("card");
             img.src = packArr[i].images.small;
             
-            // add holo class to reverse and end holo
-            if(holo && i == (packArr.length - 1) || i == (packArr.length - 2))
-                div.classList.add("holo");
+            if(currSetID === "swsh4") {
+                if(i == 0)
+                    img.classList.add("sm-energy");
+                
+                // add holo class to reverse and end holo
+                if(holo && i == (packArr.length - 1) || i == (packArr.length - 2))
+                    div.classList.add("holo");
+            }
             
             div.appendChild(img);
             pack.appendChild(div);

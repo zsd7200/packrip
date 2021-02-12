@@ -202,9 +202,14 @@ window.onload = function () {
       var div = document.createElement('div');
       var img = document.createElement('img');
       div.classList.add("card");
-      img.src = packArr[_i3].images.small; // add holo class to reverse and end holo
+      img.src = packArr[_i3].images.small;
 
-      if (holo && _i3 == packArr.length - 1 || _i3 == packArr.length - 2) div.classList.add("holo");
+      if (currSetID === "swsh4") {
+        if (_i3 == 0) img.classList.add("sm-energy"); // add holo class to reverse and end holo
+
+        if (holo && _i3 == packArr.length - 1 || _i3 == packArr.length - 2) div.classList.add("holo");
+      }
+
       div.appendChild(img);
       pack.appendChild(div);
     }

@@ -52,7 +52,8 @@ h1 {
 /* MARK: - Cards - */
 .card {
   display: inline-block;
-  border-radius: 7px; }
+  border-radius: 7px;
+  padding-right: 10px; }
 
 /* Shine effect modified from: https://codepen.io/paigen11/pen/VwKZGMp */
 .holo {
@@ -84,6 +85,13 @@ h1 {
   .holo::before, .holo::after {
     animation: shine 2s infinite;
     animation-delay: .8s; }
+
+.sm-energy {
+  background-color: #FFE165;
+  border: 6px solid #FFE165;
+  border-top: 8px solid #FFE165;
+  border-bottom: 4px solid #FFE165;
+  border-radius: 7px; }
 
 @keyframes shine {
   0% {
