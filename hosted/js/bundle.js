@@ -281,11 +281,13 @@ window.onload = function () {
     };
 
     var moveCard = function moveCard(cardIndex, parent) {
-      // move the card over to the left by adding seen card class
+      var p; // move the card over to the left by adding seen card class
+
       parent.childNodes[cardIndex].classList.add("seen-card");
       parent.childNodes[cardIndex].style.zIndex = packArr.length + cardIndex; // add new onclick handler to put it back on the pile
 
       parent.childNodes[cardIndex].onclick = function () {
+        p.remove();
         parent.childNodes[cardIndex].classList.remove("seen-card");
         parent.childNodes[cardIndex].style.zIndex = packArr.length - cardIndex;
 
@@ -296,7 +298,7 @@ window.onload = function () {
 
 
       if (cardIndex == packArr.length - 1) {
-        var p = document.createElement('p');
+        p = document.createElement('p');
         var noPrices = false;
         var highest = 0;
         var highestIndex = 0;

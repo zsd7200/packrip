@@ -266,12 +266,15 @@ window.onload = () => {
         };
         
         let moveCard = (cardIndex, parent) => {
+            let p;
+            
             // move the card over to the left by adding seen card class
             parent.childNodes[cardIndex].classList.add("seen-card");
             parent.childNodes[cardIndex].style.zIndex = packArr.length + cardIndex;
             
             // add new onclick handler to put it back on the pile
             parent.childNodes[cardIndex].onclick = () => {
+                p.remove();
                 parent.childNodes[cardIndex].classList.remove("seen-card");
                 parent.childNodes[cardIndex].style.zIndex = packArr.length - cardIndex;
                 parent.childNodes[cardIndex].onclick = () => { moveCard(cardIndex, parent); };
@@ -279,7 +282,7 @@ window.onload = () => {
             
             // get price of pack based on TCGPlayer market price
             if(cardIndex == packArr.length - 1) {
-                let p = document.createElement('p');
+                p = document.createElement('p');
                 let noPrices = false;
                 let highest = 0;
                 let highestIndex = 0;
