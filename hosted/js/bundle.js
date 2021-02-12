@@ -86,7 +86,8 @@ window.onload = function () {
 
   var showCards = function showCards() {
     // empty array to hold current pack
-    var packArr = []; // divide current set by rarities
+    var packArr = [];
+    var holo = true; // divide current set by rarities
 
     var currSetComm = currSet.filter(function (card) {
       return card.rarity == "Common";
@@ -171,7 +172,7 @@ window.onload = function () {
         shuffle(packArr); // reverse slot
 
         if (amazing) packArr.push(randCard(currSetAmaz));else if (random(0, 2184) < 1313) {
-          // 60% chance for reverse slot rare
+          // 60% chance for reverse slot rare (same as regular chances of non-holo rare)
           if (random(0, 2184) < 366) // 17% chance for reverse slot holo rare
             packArr.push(randCard(currSetHolo));else packArr.push(randCard(currSetRare));
         } else if (random(0, 3) == 0) // 1/3 chance for uncommon reverse slot over common, this one is a guess
@@ -183,7 +184,10 @@ window.onload = function () {
           packArr.push(randCard(currSetUlt));else if (random(0, 2184) < 91) // 4.17% chance for VMAX
           packArr.push(randCard(currSetVMax));else if (random(0, 2184) < 271) // 12.41 chance for V
           packArr.push(randCard(currSetV));else if (random(0, 2184) < 366) // 16.76% chance for holo
-          packArr.push(randCard(currSetHolo));else packArr.push(randCard(currSetRare)); // energies from VV are supposed to be from swsh base set
+          packArr.push(randCard(currSetHolo));else {
+          packArr.push(randCard(currSetRare));
+          holo = false;
+        } // energies from VV are supposed to be from swsh base set
         // but the TCG API doesn't have these energies available,
         // so we're using sm energies instead
 
@@ -195,10 +199,14 @@ window.onload = function () {
     pack.innerHTML = "";
 
     for (var _i3 = 0; _i3 < packArr.length; _i3++) {
+      var div = document.createElement('div');
       var img = document.createElement('img');
-      img.classList.add("card");
-      img.src = packArr[_i3].images.small;
-      pack.appendChild(img);
+      div.classList.add("card");
+      img.src = packArr[_i3].images.small; // add holo class to reverse and end holo
+
+      if (holo && _i3 == packArr.length - 1 || _i3 == packArr.length - 2) div.classList.add("holo");
+      div.appendChild(img);
+      pack.appendChild(div);
     }
   };
 };

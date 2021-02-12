@@ -96,6 +96,7 @@ window.onload = () => {
     let showCards = () => {
         // empty array to hold current pack
         let packArr = [];
+        let holo = true;
         
         // divide current set by rarities
         let currSetComm = currSet.filter((card) => { return card.rarity == "Common"; });
@@ -155,7 +156,7 @@ window.onload = () => {
                 // reverse slot
                 if(amazing)
                     packArr.push(randCard(currSetAmaz));
-                else if(random(0, 2184) < 1313) {                       // 60% chance for reverse slot rare
+                else if(random(0, 2184) < 1313) {                       // 60% chance for reverse slot rare (same as regular chances of non-holo rare)
                     if(random(0, 2184) < 366)                           // 17% chance for reverse slot holo rare
                         packArr.push(randCard(currSetHolo));
                     else
@@ -179,8 +180,10 @@ window.onload = () => {
                     packArr.push(randCard(currSetV));
                 else if(random(0, 2184) < 366)                          // 16.76% chance for holo
                     packArr.push(randCard(currSetHolo));
-                else
+                else {
                     packArr.push(randCard(currSetRare));
+                    holo = false;
+                }
                 
                 // energies from VV are supposed to be from swsh base set
                 // but the TCG API doesn't have these energies available,
@@ -188,16 +191,22 @@ window.onload = () => {
                 packArr.unshift(randCard(smEnergies));
                 
                 break;
-            
         }
         
         // clear pack innerHTML and 
         pack.innerHTML = "";
         for(let i = 0; i < packArr.length; i++) {
+            let div = document.createElement('div');
             let img = document.createElement('img');
-            img.classList.add("card");
+            div.classList.add("card");
             img.src = packArr[i].images.small;
-            pack.appendChild(img);
+            
+            // add holo class to reverse and end holo
+            if(holo && i == (packArr.length - 1) || i == (packArr.length - 2))
+                div.classList.add("holo");
+            
+            div.appendChild(img);
+            pack.appendChild(div);
         }
     };
 };
