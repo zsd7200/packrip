@@ -16,7 +16,8 @@ window.onload = function () {
   var setData = {};
   var setIDs = [];
   var currSet = {};
-  var currSetID = ""; // get setIDs upon load
+  var currSetID = "";
+  var tilt1 = true; // get setIDs upon load
 
   socket.on('start', function (sets) {
     setData = JSON.parse(sets);
@@ -224,6 +225,7 @@ window.onload = function () {
       div.classList.add("holo");
       div.classList.add("booster-container");
       img.classList.add("booster-art");
+      img.classList.add("tilt1");
       img.src = imgSrc;
 
       flex.onclick = function () {
@@ -248,9 +250,11 @@ window.onload = function () {
         var div = document.createElement('div');
         var img = document.createElement('img');
         div.classList.add("card");
+        div.classList.add("tilt1");
         div.classList.add("hidden");
         div.style.zIndex = 100 - _i3;
         img.src = packArr[_i3].images.small;
+        tilt1 = true;
 
         if (currSetID === "swsh4") {
           if (_i3 == 0) img.classList.add("sm-energy"); // add holo class to reverse and end holo
@@ -284,12 +288,33 @@ window.onload = function () {
       var p; // move the card over to the left by adding seen card class
 
       parent.childNodes[cardIndex].classList.add("seen-card");
+      parent.childNodes[cardIndex].classList.remove("tilt1");
+      parent.childNodes[cardIndex].classList.remove("tilt2");
       parent.childNodes[cardIndex].style.zIndex = packArr.length + cardIndex; // add new onclick handler to put it back on the pile
 
       parent.childNodes[cardIndex].onclick = function () {
         if (p) p.remove();
         parent.childNodes[cardIndex].style.zIndex = 100 - cardIndex;
-        parent.childNodes[cardIndex].classList.remove("seen-card");
+        parent.childNodes[cardIndex].classList.remove("seen-card"); // sync tilt animation
+
+        var _loop2 = function _loop2(_i5) {
+          // remove all tilt
+          parent.childNodes[_i5].classList.remove("tilt1");
+
+          parent.childNodes[_i5].classList.remove("tilt2"); // readd tilt
+
+
+          setTimeout(function () {
+            if (tilt1) parent.childNodes[_i5].classList.add("tilt2");else parent.childNodes[_i5].classList.add("tilt1");
+          }, 10);
+        };
+
+        for (var _i5 = cardIndex; _i5 < parent.childNodes.length; _i5++) {
+          _loop2(_i5);
+        } // swap tilt variable
+
+
+        tilt1 = !tilt1;
 
         parent.childNodes[cardIndex].onclick = function () {
           moveCard(cardIndex, parent);
@@ -304,42 +329,42 @@ window.onload = function () {
         var highestIndex = 0;
         var price = 0;
 
-        for (var _i5 = 0; _i5 < packArr.length; _i5++) {
+        for (var _i6 = 0; _i6 < packArr.length; _i6++) {
           // start from holofoil and work down
           try {
-            if (packArr[_i5].tcgplayer.prices.holofoil && _i5 == packArr.length - 1 || !packArr[_i5].tcgplayer.prices.reverseHolofoil && _i5 == packArr.length - 2) {
-              price += packArr[_i5].tcgplayer.prices.holofoil.market;
+            if (packArr[_i6].tcgplayer.prices.holofoil && _i6 == packArr.length - 1 || !packArr[_i6].tcgplayer.prices.reverseHolofoil && _i6 == packArr.length - 2) {
+              price += packArr[_i6].tcgplayer.prices.holofoil.market;
 
-              if (packArr[_i5].tcgplayer.prices.holofoil.market > highest) {
-                highest = packArr[_i5].tcgplayer.prices.holofoil.market;
-                highestIndex = _i5;
+              if (packArr[_i6].tcgplayer.prices.holofoil.market > highest) {
+                highest = packArr[_i6].tcgplayer.prices.holofoil.market;
+                highestIndex = _i6;
               }
-            } else if (packArr[_i5].tcgplayer.prices.reverseHolofoil && _i5 == packArr.length - 2) {
-              price += packArr[_i5].tcgplayer.prices.reverseHolofoil.market;
+            } else if (packArr[_i6].tcgplayer.prices.reverseHolofoil && _i6 == packArr.length - 2) {
+              price += packArr[_i6].tcgplayer.prices.reverseHolofoil.market;
 
-              if (packArr[_i5].tcgplayer.prices.reverseHolofoil.market > highest) {
-                highest = packArr[_i5].tcgplayer.prices.reverseHolofoil.market;
-                highestIndex = _i5;
+              if (packArr[_i6].tcgplayer.prices.reverseHolofoil.market > highest) {
+                highest = packArr[_i6].tcgplayer.prices.reverseHolofoil.market;
+                highestIndex = _i6;
               }
-            } else if (packArr[_i5].tcgplayer.prices.normal) {
-              price += packArr[_i5].tcgplayer.prices.normal.market;
+            } else if (packArr[_i6].tcgplayer.prices.normal) {
+              price += packArr[_i6].tcgplayer.prices.normal.market;
 
-              if (packArr[_i5].tcgplayer.prices.normal.market > highest) {
-                highest = packArr[_i5].tcgplayer.prices.normal.market;
-                highestIndex = _i5;
+              if (packArr[_i6].tcgplayer.prices.normal.market > highest) {
+                highest = packArr[_i6].tcgplayer.prices.normal.market;
+                highestIndex = _i6;
               }
-            } else if (packArr[_i5].tcgplayer.prices.holofoil) {
+            } else if (packArr[_i6].tcgplayer.prices.holofoil) {
               // this check is a fallback for sets that are still 100% randomized
-              price += packArr[_i5].tcgplayer.prices.holofoil.market;
+              price += packArr[_i6].tcgplayer.prices.holofoil.market;
 
-              if (packArr[_i5].tcgplayer.prices.holofoil.market > highest) {
-                highest = packArr[_i5].tcgplayer.prices.holofoil.market;
-                highestIndex = _i5;
+              if (packArr[_i6].tcgplayer.prices.holofoil.market > highest) {
+                highest = packArr[_i6].tcgplayer.prices.holofoil.market;
+                highestIndex = _i6;
               }
             }
           } catch (err) {
             // to prevent this from being thrown on energy cards
-            if (packArr[_i5].supertype != "Energy") noPrices = true; // tcgplayer price debugging
+            if (packArr[_i6].supertype != "Energy") noPrices = true; // tcgplayer price debugging
             //console.log("Error on card: " + i);
             //console.log(packArr[i]);
             //console.log(err);

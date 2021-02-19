@@ -16,6 +16,7 @@ window.onload = () => {
     let setIDs = [];
     let currSet = {};
     let currSetID = "";
+    let tilt1 = true;
     
     // get setIDs upon load
     socket.on('start', (sets) => {
@@ -217,6 +218,7 @@ window.onload = () => {
             div.classList.add("holo");
             div.classList.add("booster-container");
             img.classList.add("booster-art");
+            img.classList.add("tilt1");
             img.src = imgSrc;
             flex.onclick = () => { open(flex, div); };
             flex.appendChild(div);
@@ -239,9 +241,11 @@ window.onload = () => {
                 let div = document.createElement('div');
                 let img = document.createElement('img');
                 div.classList.add("card");
+                div.classList.add("tilt1");
                 div.classList.add("hidden");
                 div.style.zIndex = 100 - i;
                 img.src = packArr[i].images.small;
+                tilt1 = true;
                 
                 if(currSetID === "swsh4") {
                     if(i == 0)
@@ -270,6 +274,8 @@ window.onload = () => {
             
             // move the card over to the left by adding seen card class
             parent.childNodes[cardIndex].classList.add("seen-card");
+            parent.childNodes[cardIndex].classList.remove("tilt1");
+            parent.childNodes[cardIndex].classList.remove("tilt2");
             parent.childNodes[cardIndex].style.zIndex = packArr.length + cardIndex;
             
             // add new onclick handler to put it back on the pile
@@ -279,6 +285,25 @@ window.onload = () => {
                 
                 parent.childNodes[cardIndex].style.zIndex = 100 - cardIndex;
                 parent.childNodes[cardIndex].classList.remove("seen-card");
+                
+                // sync tilt animation
+                for(let i = cardIndex; i < parent.childNodes.length; i++) {
+                    // remove all tilt
+                    parent.childNodes[i].classList.remove("tilt1");
+                    parent.childNodes[i].classList.remove("tilt2");
+                    
+                    // readd tilt
+                    setTimeout(() => {
+                        if(tilt1)
+                            parent.childNodes[i].classList.add("tilt2");
+                        else
+                            parent.childNodes[i].classList.add("tilt1");
+                    }, 10);
+                }
+                
+                // swap tilt variable
+                tilt1 = !tilt1;
+                
                 parent.childNodes[cardIndex].onclick = () => { moveCard(cardIndex, parent); };
             };
             

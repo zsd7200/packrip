@@ -56,8 +56,10 @@ h1 {
   border-radius: 7px;
   padding-right: 10px;
   cursor: pointer;
-  animation: tilt 1s infinite;
   transition: .5s; }
+  .card img {
+    background-color: #FFE165;
+    border-radius: 7px; }
 
 .seen-card {
   position: absolute;
@@ -115,18 +117,20 @@ h1 {
 
 .booster-art {
   height: 400px;
-  width: auto;
-  animation: tilt .5s infinite; }
-
-.zoom {
-  animation: zoom 1s forwards;
-  transform-origin: top-left; }
+  width: auto; }
 
 .price {
   padding: 10px;
   background-color: white;
   border: 2px solid black;
   border-radius: 10px; }
+
+.zoom {
+  animation: zoom 1s forwards;
+  transform-origin: top-left; }
+
+.tilt1, .tilt2 {
+  animation: tilt 1s infinite; }
 
 @keyframes shine {
   0% {
