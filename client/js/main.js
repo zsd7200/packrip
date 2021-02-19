@@ -83,7 +83,22 @@ window.onload = () => {
     // hide loading icon and set localstorage data
     socket.on('get-set', (data, setID) => {
         loading.classList.add("hidden");
-        localStorage.setItem(lsKey + setID, JSON.stringify(data));
+        
+        // try to store new set data in localStorage
+        try { localStorage.setItem(lsKey + setID, JSON.stringify(data)); }
+        catch(err) {
+            // store data to put back into localStorage
+            let selection, energy;
+            selection = localStorage.getItem(lsKey + "selection");
+            energy = localStorage.getItem(lsKey + "smEnergy");
+            
+            // clear localstorage and restore some old data
+            localStorage.clear();
+            localStorage.setItem(lsKey + "selection", selection);
+            localStorage.setItem(lsKey + "smEnergy", energy);
+            localStorage.setItem(lsKey + setID, JSON.stringify(data));
+        }
+        
         currSet = data;
         showCards();
     });

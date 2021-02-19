@@ -75,8 +75,22 @@ window.onload = function () {
   }); // hide loading icon and set localstorage data
 
   socket.on('get-set', function (data, setID) {
-    loading.classList.add("hidden");
-    localStorage.setItem(lsKey + setID, JSON.stringify(data));
+    loading.classList.add("hidden"); // try to store new set data in localStorage
+
+    try {
+      localStorage.setItem(lsKey + setID, JSON.stringify(data));
+    } catch (err) {
+      // store data to put back into localStorage
+      var selection, energy;
+      selection = localStorage.getItem(lsKey + "selection");
+      energy = localStorage.getItem(lsKey + "smEnergy"); // clear localstorage and restore some old data
+
+      localStorage.clear();
+      localStorage.setItem(lsKey + "selection", selection);
+      localStorage.setItem(lsKey + "smEnergy", energy);
+      localStorage.setItem(lsKey + setID, JSON.stringify(data));
+    }
+
     currSet = data;
     showCards();
   }); // send error to console
