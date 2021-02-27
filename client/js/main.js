@@ -70,6 +70,8 @@ window.onload = () => {
             currSet = JSON.parse(localStorage.getItem(lsKey + currSetID));
             showCards();
         }
+        
+        // console.log(currSetID);
     };
     
     // energy storage
@@ -113,6 +115,7 @@ window.onload = () => {
         // empty array to hold current pack
         let packArr = [];
         let holo = true;
+        let boosterArt = "";
         
         // divide current set by rarities
         let currSetComm = currSet.filter((card) => { return card.rarity == "Common"; });
@@ -125,9 +128,6 @@ window.onload = () => {
         let currSetRain = currSet.filter((card) => { return card.rarity == "Rare Rainbow"; });
         let currSetSec = currSet.filter((card) => { return card.rarity == "Rare Secret"; });
         let currSetAmaz = currSet.filter((card) => { return card.rarity == "Amazing Rare"; });
-        
-        // for use later
-        let boosterArt = "";
         
         // check for duplicate cards
         let dupeCheck = (currPack, set) => {
@@ -150,65 +150,103 @@ window.onload = () => {
             return set[rand];
         };
         
+        // get a random card from the entirety of your given set
         let randCard = (set) => { return set[random(0, set.length)]; };
+        
+        // gets a pack from a set of parameters,
+        // most likely won't be used for older sets,
+        // but good for newer sets
+        let getPack = (reverse = "none",
+                       revPerc = -1,
+                       totalOdds = -1,
+                       rareOdds = {},
+                       guaranteeHolo = false,
+                       useSmEnergies = true,) => {
+
+            let retArr = [];
+            const comm = random(0, 5) + 4;
+            const uncom = 8 - comm;
+            const amazing = (reverse == "amazing" && random(0, 100) < revPerc) ? true : false;
+            const energy = (reverse == "energy" && random(0, 100) < revPerc) ? true : false;
+            
+            // fill up common and uncommon slots
+            for(let i = 0; i < comm; i++)
+                retArr.push(dupeCheck(retArr, currSetComm));
+            
+            for(let i = 0; i < uncom; i++)
+                retArr.push(dupeCheck(retArr, currSetUncomm));
+            
+            // shuffle array order
+            shuffle(retArr);
+            
+            // reverse slot
+            if(amazing)
+                retArr.push(randCard(currSetAmaz));
+            else if (energy && useSmEnergies)
+                retArr.push(randCard(smEnergies));
+            else if(random(0, totalOdds) < rareOdds.revRare) {
+                if(random(0, totalOdds) < rareOdds.holo)
+                    retArr.push(randCard(currSetHolo));
+                else
+                    retArr.push(randCard(currSetRare));
+            } 
+            else if(random(0, totalOdds) < rareOdds.uncomRev)
+                retArr.push(randCard(currSetUncomm));
+            else
+                retArr.push(randCard(currSetComm));
+            
+            // rare slot
+            if(random(0, totalOdds) < rareOdds.sec)
+                retArr.push(randCard(currSetSec));
+            else if(random(0, totalOdds) < rareOdds.rain)
+                retArr.push(randCard(currSetRain));
+            else if(random(0, totalOdds) < rareOdds.ult)
+                retArr.push(randCard(currSetUlt));
+            else if(random(0, totalOdds) < rareOdds.vmax)
+                retArr.push(randCard(currSetVMax));
+            else if(random(0, totalOdds) < rareOdds.v)
+                retArr.push(randCard(currSetV));
+            else if(random(0, totalOdds) < rareOdds.holo || guaranteeHolo)
+                retArr.push(randCard(currSetHolo));
+            else {
+                retArr.push(randCard(currSetRare));
+                holo = false;
+            }
+            
+            if(useSmEnergies)
+                retArr.unshift(randCard(smEnergies));
+            
+            return retArr;
+        };
         
         switch(currSetID) {
             default:
                 for(let i = 0; i < 11; i++)
                     packArr.push(randCard(currSet));
                 break;
-            case "swsh4":                                               // vivid voltage data from https://cardzard.com/blogs/news/vivid-voltage-pull-rate-data
-                const comm = random(0, 5) + 4;                          // at least 4 commons
-                const uncom = 8 - comm;                                 // remainder with uncommons
-                const amazing = (random(0, 20) == 0) ? true : false;    // 1/20 chance for amazing
-                
-                // fill up common and uncommon slots
-                for(let i = 0; i < comm; i++)
-                    packArr.push(dupeCheck(packArr, currSetComm));
-                
-                for(let i = 0; i < uncom; i++)
-                    packArr.push(dupeCheck(packArr, currSetUncomm));
-                
-                // shuffle array order
-                shuffle(packArr);
-                
-                // reverse slot
-                if(amazing)
-                    packArr.push(randCard(currSetAmaz));
-                else if(random(0, 2184) < 1313) {                       // 60% chance for reverse slot rare (same as regular chances of non-holo rare)
-                    if(random(0, 2184) < 366)                           // 17% chance for reverse slot holo rare
-                        packArr.push(randCard(currSetHolo));
-                    else
-                        packArr.push(randCard(currSetRare));
-                } 
-                else if(random(0, 3) == 0)                              // 1/3 chance for uncommon reverse slot over common, this one is a guess
-                    packArr.push(randCard(currSetUncomm));
-                else
-                    packArr.push(randCard(currSetComm));
-                
-                // rare slot
-                if(random(0, 2184) < 23)                                // 1.05% chance for golden
-                    packArr.push(randCard(currSetSec));
-                else if(random(0, 2184) < 31)                           // 1.42% chance for rainbow
-                    packArr.push(randCard(currSetRain));
-                else if(random(0, 2184) < 89)                           // 4.07% chance for ultra rare
-                    packArr.push(randCard(currSetUlt));
-                else if(random(0, 2184) < 91)                           // 4.17% chance for VMAX
-                    packArr.push(randCard(currSetVMax));
-                else if(random(0, 2184) < 271)                          // 12.41 chance for V
-                    packArr.push(randCard(currSetV));
-                else if(random(0, 2184) < 366)                          // 16.76% chance for holo
-                    packArr.push(randCard(currSetHolo));
-                else {
-                    packArr.push(randCard(currSetRare));
-                    holo = false;
-                }
-                
-                // energies from VV are supposed to be from swsh base set
-                // but the TCG API doesn't have these energies available,
-                // so we're using sm energies instead
-                packArr.unshift(randCard(smEnergies));
-                
+            case "swsh4":                                   // vivid voltage data from https://cardzard.com/blogs/news/vivid-voltage-pull-rate-data
+                packArr = getPack("amazing", 5, 2184, {     // 5% chance for amazing, x/2184 for whole set
+                    revRare : 1313,                         // 60% chance for reverse slot rare (same as regular chances of non-holo rare)
+                    holo : 366,                             // 16.76% chance for holo
+                    uncomRev : 764,                         // 35% chance for uncommon reverse slot over common, this one is a guess
+                    sec : 23,                               // 1.05% chance for golden
+                    rain : 31,                              // 1.42% chance for rainbow
+                    ult : 89,                               // 4.07% chance for ultra rare
+                    vmax : 91,                              // 4.17% chance for VMAX
+                    v : 271,                                // 12.41 chance for V
+                });
+                break;
+            case "swsh35":                                  // champ's path data from https://cardzard.com/blogs/news/champions-path-pull-rate-data-2020
+                packArr = getPack("energy", 9, 1457, {      // 9% chance for amazing, x/1457 for whole set
+                    revRare : 248,                          // 17% chance for reverse slot rare (same as regular chances of non-holo rare)
+                    holo : 1105,                            // 75% chance for holo
+                    uncomRev : 504,                         // 34% chance for uncommon reverse slot over common, this one is a guess
+                    sec : 19,                               // 1.28% chance for secret
+                    rain : 24,                              // 1.65% chance for rainbow
+                    ult : 61,                               // 4.21% chance for ultra rare
+                    vmax : 248,                             // 17.03% chance for VMAX
+                    v : 248,                                // 17.03% chance for V
+                }, true);
                 break;
         }
         
@@ -251,6 +289,9 @@ window.onload = () => {
             // zoom child in
             child.classList.add("zoom");
             
+            // remove hidden class from loading
+            loading.classList.remove("hidden");
+            
             // format pack
             for(let i = 0; i < packArr.length; i++) {
                 let div = document.createElement('div');
@@ -259,11 +300,16 @@ window.onload = () => {
                 div.classList.add("tilt1");
                 div.classList.add("hidden");
                 div.style.zIndex = 100 - i;
+                // if last card in pack, remove loading
+                if(i == packArr.length - 1)
+                    img.onload = () => { loading.classList.add("hidden"); };
+                
                 img.src = packArr[i].images.small;
                 tilt1 = true;
                 
-                if(currSetID === "swsh4") {
-                    if(i == 0)
+                // do this for modern completed sets
+                if(currSetID === "swsh4" || currSetID === "swsh35") {
+                    if(packArr[i].supertype == "Energy")
                         img.classList.add("sm-energy");
                     
                     // add holo class to reverse and end holo
@@ -365,9 +411,11 @@ window.onload = () => {
                             noPrices = true;
                         
                         // tcgplayer price debugging
-                        //console.log("Error on card: " + i);
-                        //console.log(packArr[i]);
-                        //console.log(err);
+                        if(noPrices) {
+                            console.log("Error on card: " + i);
+                            console.log(packArr[i]);
+                            console.log(err);
+                        }
                         continue;
                     }
                 }

@@ -62,7 +62,8 @@ window.onload = function () {
     } else {
       currSet = JSON.parse(localStorage.getItem(lsKey + currSetID));
       showCards();
-    }
+    } // console.log(currSetID);
+
   }; // energy storage
 
 
@@ -102,7 +103,8 @@ window.onload = function () {
   var showCards = function showCards() {
     // empty array to hold current pack
     var packArr = [];
-    var holo = true; // divide current set by rarities
+    var holo = true;
+    var boosterArt = ""; // divide current set by rarities
 
     var currSetComm = currSet.filter(function (card) {
       return card.rarity == "Common";
@@ -133,9 +135,7 @@ window.onload = function () {
     });
     var currSetAmaz = currSet.filter(function (card) {
       return card.rarity == "Amazing Rare";
-    }); // for use later
-
-    var boosterArt = ""; // check for duplicate cards
+    }); // check for duplicate cards
 
     var dupeCheck = function dupeCheck(currPack, set) {
       var dupe, rand; // loops until dupe is false
@@ -154,10 +154,50 @@ window.onload = function () {
 
 
       return set[rand];
-    };
+    }; // get a random card from the entirety of your given set
+
 
     var randCard = function randCard(set) {
       return set[random(0, set.length)];
+    }; // gets a pack from a set of parameters,
+    // most likely won't be used for older sets,
+    // but good for newer sets
+
+
+    var getPack = function getPack() {
+      var reverse = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "none";
+      var revPerc = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
+      var totalOdds = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
+      var rareOdds = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+      var guaranteeHolo = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+      var useSmEnergies = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : true;
+      var retArr = [];
+      var comm = random(0, 5) + 4;
+      var uncom = 8 - comm;
+      var amazing = reverse == "amazing" && random(0, 100) < revPerc ? true : false;
+      var energy = reverse == "energy" && random(0, 100) < revPerc ? true : false; // fill up common and uncommon slots
+
+      for (var i = 0; i < comm; i++) {
+        retArr.push(dupeCheck(retArr, currSetComm));
+      }
+
+      for (var _i = 0; _i < uncom; _i++) {
+        retArr.push(dupeCheck(retArr, currSetUncomm));
+      } // shuffle array order
+
+
+      shuffle(retArr); // reverse slot
+
+      if (amazing) retArr.push(randCard(currSetAmaz));else if (energy && useSmEnergies) retArr.push(randCard(smEnergies));else if (random(0, totalOdds) < rareOdds.revRare) {
+        if (random(0, totalOdds) < rareOdds.holo) retArr.push(randCard(currSetHolo));else retArr.push(randCard(currSetRare));
+      } else if (random(0, totalOdds) < rareOdds.uncomRev) retArr.push(randCard(currSetUncomm));else retArr.push(randCard(currSetComm)); // rare slot
+
+      if (random(0, totalOdds) < rareOdds.sec) retArr.push(randCard(currSetSec));else if (random(0, totalOdds) < rareOdds.rain) retArr.push(randCard(currSetRain));else if (random(0, totalOdds) < rareOdds.ult) retArr.push(randCard(currSetUlt));else if (random(0, totalOdds) < rareOdds.vmax) retArr.push(randCard(currSetVMax));else if (random(0, totalOdds) < rareOdds.v) retArr.push(randCard(currSetV));else if (random(0, totalOdds) < rareOdds.holo || guaranteeHolo) retArr.push(randCard(currSetHolo));else {
+        retArr.push(randCard(currSetRare));
+        holo = false;
+      }
+      if (useSmEnergies) retArr.unshift(randCard(smEnergies));
+      return retArr;
     };
 
     switch (currSetID) {
@@ -170,45 +210,48 @@ window.onload = function () {
 
       case "swsh4":
         // vivid voltage data from https://cardzard.com/blogs/news/vivid-voltage-pull-rate-data
-        var comm = random(0, 5) + 4; // at least 4 commons
-
-        var uncom = 8 - comm; // remainder with uncommons
-
-        var amazing = random(0, 20) == 0 ? true : false; // 1/20 chance for amazing
-        // fill up common and uncommon slots
-
-        for (var _i = 0; _i < comm; _i++) {
-          packArr.push(dupeCheck(packArr, currSetComm));
-        }
-
-        for (var _i2 = 0; _i2 < uncom; _i2++) {
-          packArr.push(dupeCheck(packArr, currSetUncomm));
-        } // shuffle array order
-
-
-        shuffle(packArr); // reverse slot
-
-        if (amazing) packArr.push(randCard(currSetAmaz));else if (random(0, 2184) < 1313) {
+        packArr = getPack("amazing", 5, 2184, {
+          // 5% chance for amazing, x/2184 for whole set
+          revRare: 1313,
           // 60% chance for reverse slot rare (same as regular chances of non-holo rare)
-          if (random(0, 2184) < 366) // 17% chance for reverse slot holo rare
-            packArr.push(randCard(currSetHolo));else packArr.push(randCard(currSetRare));
-        } else if (random(0, 3) == 0) // 1/3 chance for uncommon reverse slot over common, this one is a guess
-          packArr.push(randCard(currSetUncomm));else packArr.push(randCard(currSetComm)); // rare slot
+          holo: 366,
+          // 16.76% chance for holo
+          uncomRev: 764,
+          // 35% chance for uncommon reverse slot over common, this one is a guess
+          sec: 23,
+          // 1.05% chance for golden
+          rain: 31,
+          // 1.42% chance for rainbow
+          ult: 89,
+          // 4.07% chance for ultra rare
+          vmax: 91,
+          // 4.17% chance for VMAX
+          v: 271 // 12.41 chance for V
 
-        if (random(0, 2184) < 23) // 1.05% chance for golden
-          packArr.push(randCard(currSetSec));else if (random(0, 2184) < 31) // 1.42% chance for rainbow
-          packArr.push(randCard(currSetRain));else if (random(0, 2184) < 89) // 4.07% chance for ultra rare
-          packArr.push(randCard(currSetUlt));else if (random(0, 2184) < 91) // 4.17% chance for VMAX
-          packArr.push(randCard(currSetVMax));else if (random(0, 2184) < 271) // 12.41 chance for V
-          packArr.push(randCard(currSetV));else if (random(0, 2184) < 366) // 16.76% chance for holo
-          packArr.push(randCard(currSetHolo));else {
-          packArr.push(randCard(currSetRare));
-          holo = false;
-        } // energies from VV are supposed to be from swsh base set
-        // but the TCG API doesn't have these energies available,
-        // so we're using sm energies instead
+        });
+        break;
 
-        packArr.unshift(randCard(smEnergies));
+      case "swsh35":
+        // champ's path data from https://cardzard.com/blogs/news/champions-path-pull-rate-data-2020
+        packArr = getPack("energy", 9, 1457, {
+          // 9% chance for amazing, x/1457 for whole set
+          revRare: 248,
+          // 17% chance for reverse slot rare (same as regular chances of non-holo rare)
+          holo: 1105,
+          // 75% chance for holo
+          uncomRev: 504,
+          // 34% chance for uncommon reverse slot over common, this one is a guess
+          sec: 19,
+          // 1.28% chance for secret
+          rain: 24,
+          // 1.65% chance for rainbow
+          ult: 61,
+          // 4.21% chance for ultra rare
+          vmax: 248,
+          // 17.03% chance for VMAX
+          v: 248 // 17.03% chance for V
+
+        }, true);
         break;
     } // clear pack innerHTML and 
 
@@ -258,42 +301,48 @@ window.onload = function () {
       // remove event handler on parent
       parent.onclick = false; // zoom child in
 
-      child.classList.add("zoom"); // format pack
+      child.classList.add("zoom"); // remove hidden class from loading
 
-      var _loop = function _loop(_i3) {
+      loading.classList.remove("hidden"); // format pack
+
+      var _loop = function _loop(_i2) {
         var div = document.createElement('div');
         var img = document.createElement('img');
         div.classList.add("card");
         div.classList.add("tilt1");
         div.classList.add("hidden");
-        div.style.zIndex = 100 - _i3;
-        img.src = packArr[_i3].images.small;
-        tilt1 = true;
+        div.style.zIndex = 100 - _i2; // if last card in pack, remove loading
 
-        if (currSetID === "swsh4") {
-          if (_i3 == 0) img.classList.add("sm-energy"); // add holo class to reverse and end holo
+        if (_i2 == packArr.length - 1) img.onload = function () {
+          loading.classList.add("hidden");
+        };
+        img.src = packArr[_i2].images.small;
+        tilt1 = true; // do this for modern completed sets
 
-          if (holo && _i3 == packArr.length - 1 || _i3 == packArr.length - 2) div.classList.add("holo");
+        if (currSetID === "swsh4" || currSetID === "swsh35") {
+          if (packArr[_i2].supertype == "Energy") img.classList.add("sm-energy"); // add holo class to reverse and end holo
+
+          if (holo && _i2 == packArr.length - 1 || _i2 == packArr.length - 2) div.classList.add("holo");
         }
 
         div.onclick = function () {
-          moveCard(_i3, parent);
+          moveCard(_i2, parent);
         };
 
         div.appendChild(img);
         parent.appendChild(div);
       };
 
-      for (var _i3 = 0; _i3 < packArr.length; _i3++) {
-        _loop(_i3);
+      for (var _i2 = 0; _i2 < packArr.length; _i2++) {
+        _loop(_i2);
       } // remove child and show cards
 
 
       setTimeout(function () {
         child.remove();
 
-        for (var _i4 = 0; _i4 < parent.childNodes.length; _i4++) {
-          parent.childNodes[_i4].classList.remove("hidden");
+        for (var _i3 = 0; _i3 < parent.childNodes.length; _i3++) {
+          parent.childNodes[_i3].classList.remove("hidden");
         }
       }, 500);
     };
@@ -311,20 +360,20 @@ window.onload = function () {
         parent.childNodes[cardIndex].style.zIndex = 100 - cardIndex;
         parent.childNodes[cardIndex].classList.remove("seen-card"); // sync tilt animation
 
-        var _loop2 = function _loop2(_i5) {
+        var _loop2 = function _loop2(_i4) {
           // remove all tilt
-          parent.childNodes[_i5].classList.remove("tilt1");
+          parent.childNodes[_i4].classList.remove("tilt1");
 
-          parent.childNodes[_i5].classList.remove("tilt2"); // readd tilt
+          parent.childNodes[_i4].classList.remove("tilt2"); // readd tilt
 
 
           setTimeout(function () {
-            if (tilt1) parent.childNodes[_i5].classList.add("tilt2");else parent.childNodes[_i5].classList.add("tilt1");
+            if (tilt1) parent.childNodes[_i4].classList.add("tilt2");else parent.childNodes[_i4].classList.add("tilt1");
           }, 10);
         };
 
-        for (var _i5 = cardIndex; _i5 < parent.childNodes.length; _i5++) {
-          _loop2(_i5);
+        for (var _i4 = cardIndex; _i4 < parent.childNodes.length; _i4++) {
+          _loop2(_i4);
         } // swap tilt variable
 
 
@@ -343,45 +392,48 @@ window.onload = function () {
         var highestIndex = 0;
         var price = 0;
 
-        for (var _i6 = 0; _i6 < packArr.length; _i6++) {
+        for (var _i5 = 0; _i5 < packArr.length; _i5++) {
           // start from holofoil and work down
           try {
-            if (packArr[_i6].tcgplayer.prices.holofoil && _i6 == packArr.length - 1 || !packArr[_i6].tcgplayer.prices.reverseHolofoil && _i6 == packArr.length - 2) {
-              price += packArr[_i6].tcgplayer.prices.holofoil.market;
+            if (packArr[_i5].tcgplayer.prices.holofoil && _i5 == packArr.length - 1 || !packArr[_i5].tcgplayer.prices.reverseHolofoil && _i5 == packArr.length - 2) {
+              price += packArr[_i5].tcgplayer.prices.holofoil.market;
 
-              if (packArr[_i6].tcgplayer.prices.holofoil.market > highest) {
-                highest = packArr[_i6].tcgplayer.prices.holofoil.market;
-                highestIndex = _i6;
+              if (packArr[_i5].tcgplayer.prices.holofoil.market > highest) {
+                highest = packArr[_i5].tcgplayer.prices.holofoil.market;
+                highestIndex = _i5;
               }
-            } else if (packArr[_i6].tcgplayer.prices.reverseHolofoil && _i6 == packArr.length - 2) {
-              price += packArr[_i6].tcgplayer.prices.reverseHolofoil.market;
+            } else if (packArr[_i5].tcgplayer.prices.reverseHolofoil && _i5 == packArr.length - 2) {
+              price += packArr[_i5].tcgplayer.prices.reverseHolofoil.market;
 
-              if (packArr[_i6].tcgplayer.prices.reverseHolofoil.market > highest) {
-                highest = packArr[_i6].tcgplayer.prices.reverseHolofoil.market;
-                highestIndex = _i6;
+              if (packArr[_i5].tcgplayer.prices.reverseHolofoil.market > highest) {
+                highest = packArr[_i5].tcgplayer.prices.reverseHolofoil.market;
+                highestIndex = _i5;
               }
-            } else if (packArr[_i6].tcgplayer.prices.normal) {
-              price += packArr[_i6].tcgplayer.prices.normal.market;
+            } else if (packArr[_i5].tcgplayer.prices.normal) {
+              price += packArr[_i5].tcgplayer.prices.normal.market;
 
-              if (packArr[_i6].tcgplayer.prices.normal.market > highest) {
-                highest = packArr[_i6].tcgplayer.prices.normal.market;
-                highestIndex = _i6;
+              if (packArr[_i5].tcgplayer.prices.normal.market > highest) {
+                highest = packArr[_i5].tcgplayer.prices.normal.market;
+                highestIndex = _i5;
               }
-            } else if (packArr[_i6].tcgplayer.prices.holofoil) {
+            } else if (packArr[_i5].tcgplayer.prices.holofoil) {
               // this check is a fallback for sets that are still 100% randomized
-              price += packArr[_i6].tcgplayer.prices.holofoil.market;
+              price += packArr[_i5].tcgplayer.prices.holofoil.market;
 
-              if (packArr[_i6].tcgplayer.prices.holofoil.market > highest) {
-                highest = packArr[_i6].tcgplayer.prices.holofoil.market;
-                highestIndex = _i6;
+              if (packArr[_i5].tcgplayer.prices.holofoil.market > highest) {
+                highest = packArr[_i5].tcgplayer.prices.holofoil.market;
+                highestIndex = _i5;
               }
             }
           } catch (err) {
             // to prevent this from being thrown on energy cards
-            if (packArr[_i6].supertype != "Energy") noPrices = true; // tcgplayer price debugging
-            //console.log("Error on card: " + i);
-            //console.log(packArr[i]);
-            //console.log(err);
+            if (packArr[_i5].supertype != "Energy") noPrices = true; // tcgplayer price debugging
+
+            if (noPrices) {
+              console.log("Error on card: " + _i5);
+              console.log(packArr[_i5]);
+              console.log(err);
+            }
 
             continue;
           }
