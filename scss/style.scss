@@ -1,15 +1,88 @@
 $card-border: #FFE165;
+$energy-light-gray: #FCFCFC;
+$energy-dark-gray: #D3D7D6;
+$energy-text: #828183;
+$err-padding: 10px;
+$bg-1: #001D4D;
+$bg-2: #003180;
+$bg-3: #004ECC;
+$bg-4: #3D74CC;
 
+/* MARK: - Body Styling/Background - */
+html {
+  width: 100%;
+  height: 100%;
+}
 body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
-    background-color: white;
     color: black;
     transition: .5s;
-    overflow-x: hidden;
+    overflow: hidden;
+    background: linear-gradient(-45deg, $bg-1, $bg-2, $bg-3, $bg-4);
+    background-size: 200% 200%;
+    animation: bg-anim 15s ease infinite;
 }
 h1 { text-align: center; }
+
+@keyframes bg-anim {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+#set-container {
+    width: 260px;
+    background-color: white;
+    padding: 10px;
+    border-right: 5px solid $card-border;
+    border-bottom: 5px solid $card-border;
+    border-bottom-right-radius: 15px;
+    
+    select { margin-top: 20px; }
+    .header { padding-right: 15px; }
+}
+
+/* MARK: - Error Display - */
+#err-disp {
+    position: absolute;
+    text-align: center;
+    margin-top: 110px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 99999;
+}
+
+#err-disp, .price {
+    padding: $err-padding;
+    padding-top: 2px;
+    background-color: white;
+    border: 5px solid $card-border;
+    color: black;
+    border-radius: 10px;
+}
+
+.header {
+    color: $energy-text;
+    width: 125px;
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    font-style: italic;
+    margin: 10px;
+    margin-left: ($err-padding * -1);
+    margin-right: ($err-padding + 10px);
+    padding-top: 2px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    font-size: 24pt;
+    text-align: left !important;
+    background: linear-gradient(180deg, $energy-light-gray, $energy-dark-gray);
+    background-size: 100% 100%;
+}
 
 /* MARK: - Loading icon modified from loading.io */
 #lds-ring {
@@ -59,7 +132,6 @@ h1 { text-align: center; }
     position: absolute;
     display: inline-block;
     border-radius: 7px;
-    padding-right: 10px;
     cursor: pointer;
     transition: .5s;
     
@@ -138,13 +210,6 @@ h1 { text-align: center; }
     width: auto;
 }
 
-.price {
-    padding: 10px;
-    background-color: white;
-    border: 2px solid black;
-    border-radius: 10px;
-}
-
 .zoom {
     animation: zoom 1s forwards;
     transform-origin: top-left;
@@ -177,7 +242,7 @@ h1 { text-align: center; }
     justify-content: center;
     align-items: center;
     text-align: center;
-    min-height: 80vh;
+    min-height: 70vh;
 }
 
 .hidden {

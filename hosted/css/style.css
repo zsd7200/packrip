@@ -1,14 +1,78 @@
+/* MARK: - Body Styling/Background - */
+html {
+  width: 100%;
+  height: 100%; }
+
 body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  background-color: white;
   color: black;
   transition: .5s;
-  overflow-x: hidden; }
+  overflow: hidden;
+  background: linear-gradient(-45deg, #001D4D, #003180, #004ECC, #3D74CC);
+  background-size: 200% 200%;
+  animation: bg-anim 15s ease infinite; }
 
 h1 {
   text-align: center; }
+
+@keyframes bg-anim {
+  0% {
+    background-position: 0% 50%; }
+  50% {
+    background-position: 100% 50%; }
+  100% {
+    background-position: 0% 50%; } }
+
+#set-container {
+  width: 260px;
+  background-color: white;
+  padding: 10px;
+  border-right: 5px solid #FFE165;
+  border-bottom: 5px solid #FFE165;
+  border-bottom-right-radius: 15px; }
+  #set-container select {
+    margin-top: 20px; }
+  #set-container .header {
+    padding-right: 15px; }
+
+/* MARK: - Error Display - */
+#err-disp {
+  position: absolute;
+  text-align: center;
+  margin-top: 110px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 99999; }
+
+#err-disp, .price {
+  padding: 10px;
+  padding-top: 2px;
+  background-color: white;
+  border: 5px solid #FFE165;
+  color: black;
+  border-radius: 10px; }
+
+.header {
+  color: #828183;
+  width: 125px;
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 600;
+  font-style: italic;
+  margin: 10px;
+  margin-left: -10px;
+  margin-right: 20px;
+  padding-top: 2px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+  font-size: 24pt;
+  text-align: left !important;
+  background: linear-gradient(180deg, #FCFCFC, #D3D7D6);
+  background-size: 100% 100%; }
 
 /* MARK: - Loading icon modified from loading.io */
 #lds-ring {
@@ -54,7 +118,6 @@ h1 {
   position: absolute;
   display: inline-block;
   border-radius: 7px;
-  padding-right: 10px;
   cursor: pointer;
   transition: .5s; }
   .card img {
@@ -119,12 +182,6 @@ h1 {
   height: 400px;
   width: auto; }
 
-.price {
-  padding: 10px;
-  background-color: white;
-  border: 2px solid black;
-  border-radius: 10px; }
-
 .zoom {
   animation: zoom 1s forwards;
   transform-origin: top-left; }
@@ -169,7 +226,7 @@ h1 {
   justify-content: center;
   align-items: center;
   text-align: center;
-  min-height: 80vh; }
+  min-height: 70vh; }
 
 .hidden {
   opacity: 0;

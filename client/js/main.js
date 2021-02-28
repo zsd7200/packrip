@@ -6,6 +6,7 @@ Loads DOM elements upon window load, handles input, handles dark mode, and more.
 
 window.onload = () => {
     let loading = document.querySelector("#lds-ring");
+    let errDisp = document.querySelector("#err-disp");
     let setDropdown = document.querySelector("#sets");
     let setSubmit = document.querySelector("#set-submit");
     let pack = document.querySelector("#pack");
@@ -16,7 +17,9 @@ window.onload = () => {
     let setIDs = [];
     let currSet = {};
     let currSetID = "";
-    let tilt1 = true;
+    let tilt1 = true;       // used for synchronizing animations after putting cards back
+    let errCheck;           // use this so only one setTimeout is going at a time in open()
+    
     
     // get setIDs upon load
     socket.on('start', (sets) => {
@@ -42,8 +45,13 @@ window.onload = () => {
             
             if(localStorage.getItem(lsKey + "selection"))
                 setDropdown.value = localStorage.getItem(lsKey + "selection");
-        } else
-            console.log("error, could not get data from server");
+        } else {
+            errDisp.innerHTML = `<p class="header">ERROR:</p>`;
+            errDisp.innerHTML += "Something went wrong!<br>";
+            errDisp.innerHTML += "Could not get data from server!<br>";
+            errDisp.innerHTML += "Please refresh the page.";
+            errDisp.classList.remove("hidden");
+        }
         
         loading.classList.add("hidden");
         
@@ -107,7 +115,11 @@ window.onload = () => {
     
     // send error to console
     socket.on('error', (err) => {
-        console.log(err);
+        errDisp.innerHTML = `<p class="header">ERROR:</p>`;
+        errDisp.innerHTML += "Something went wrong!<br>";
+        errDisp.innerHTML += "Please report the following to the dev:<br>";
+        errDisp.innerHTML += err;
+        errDisp.classList.remove("hidden");
     });
     
     // generate packs and display them
@@ -115,6 +127,8 @@ window.onload = () => {
         // empty array to hold current pack
         let packArr = [];
         let holo = true;
+        
+        // for use in show/get booster art
         let boosterArt = "";
         
         // divide current set by rarities
@@ -185,7 +199,7 @@ window.onload = () => {
             else if (energy && useSmEnergies)
                 retArr.push(randCard(smEnergies));
             else if(random(0, totalOdds) < rareOdds.revRare) {
-                if(random(0, totalOdds) < rareOdds.holo)
+                if(random(0, totalOdds) < rareOdds.holo || guaranteeHolo)
                     retArr.push(randCard(currSetHolo));
                 else
                     retArr.push(randCard(currSetRare));
@@ -214,7 +228,7 @@ window.onload = () => {
             }
             
             if(useSmEnergies)
-                retArr.unshift(randCard(smEnergies));
+                retArr.unshift(randCard(smEnergies)); 
             
             return retArr;
         };
@@ -268,7 +282,6 @@ window.onload = () => {
             let div = document.createElement('div');
             let img = document.createElement('img');
             flex.classList.add("center");
-            div.classList.add("holo");
             div.classList.add("booster-container");
             img.classList.add("booster-art");
             img.classList.add("tilt1");
@@ -282,7 +295,7 @@ window.onload = () => {
         // run getBooster art
         getBoosterArt();
         
-        let open = (parent, child) => {
+        let open = (parent, child) => {            
             // remove event handler on parent
             parent.onclick = false;
             
@@ -292,6 +305,20 @@ window.onload = () => {
             // remove hidden class from loading
             loading.classList.remove("hidden");
             
+            // handle showing an error if applicable
+            errDisp.classList.add("hidden");
+            
+            // reset timeout for error checking
+            clearTimeout(errCheck);
+            errCheck = setTimeout(() => {
+                if(loading.classList.length == 0) {
+                    errDisp.innerHTML = `<p class="header">ERROR:</p>`;
+                    errDisp.innerHTML += "It seems like something went wrong...<br>";
+                    errDisp.innerHTML += "Please refresh and try again.";
+                    errDisp.classList.remove("hidden");
+                }
+            }, 5000);
+            
             // format pack
             for(let i = 0; i < packArr.length; i++) {
                 let div = document.createElement('div');
@@ -300,9 +327,9 @@ window.onload = () => {
                 div.classList.add("tilt1");
                 div.classList.add("hidden");
                 div.style.zIndex = 100 - i;
-                // if last card in pack, remove loading
+                // if last card in pack, remove loading and err message
                 if(i == packArr.length - 1)
-                    img.onload = () => { loading.classList.add("hidden"); };
+                    img.onload = () => { loading.classList.add("hidden"); errDisp.classList.add("hidden"); };
                 
                 img.src = packArr[i].images.small;
                 tilt1 = true;
@@ -420,12 +447,15 @@ window.onload = () => {
                     }
                 }
                 
+                // create header
+                p.innerHTML = `<p class="header">PRICE:</p>`;
+                
                 // update innerhtml for new p element
                 if(!noPrices) {
-                    p.innerHTML = "Your pack is worth: <b>$" + price.toFixed(2) + "</b>.<br>";
+                    p.innerHTML += "Your pack is worth: <b>$" + price.toFixed(2) + "</b>.<br>";
                     p.innerHTML += "Your best hit was: <b>" + packArr[highestIndex].name + "</b> at <b>$" + highest.toFixed(2) + "</b>.";
                 } else {
-                    p.innerHTML = "This pack is missing at least one card on TCGPlayer, and therefore cannot be valued. <br>";
+                    p.innerHTML += "This pack is missing at least one card on TCGPlayer, and therefore cannot be valued. <br>";
                     p.innerHTML += "Apologies for the inconvenience.";
                 }
                 

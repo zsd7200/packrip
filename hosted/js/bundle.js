@@ -7,6 +7,7 @@ Loads DOM elements upon window load, handles input, handles dark mode, and more.
 */
 window.onload = function () {
   var loading = document.querySelector("#lds-ring");
+  var errDisp = document.querySelector("#err-disp");
   var setDropdown = document.querySelector("#sets");
   var setSubmit = document.querySelector("#set-submit");
   var pack = document.querySelector("#pack");
@@ -17,7 +18,10 @@ window.onload = function () {
   var setIDs = [];
   var currSet = {};
   var currSetID = "";
-  var tilt1 = true; // get setIDs upon load
+  var tilt1 = true; // used for synchronizing animations after putting cards back
+
+  var errCheck; // use this so only one setTimeout is going at a time in open()
+  // get setIDs upon load
 
   socket.on('start', function (sets) {
     setData = JSON.parse(sets);
@@ -37,7 +41,13 @@ window.onload = function () {
       setSubmit.disabled = false;
       setDropdown.disabled = false;
       if (localStorage.getItem(lsKey + "selection")) setDropdown.value = localStorage.getItem(lsKey + "selection");
-    } else console.log("error, could not get data from server");
+    } else {
+      errDisp.innerHTML = "<p class=\"header\">ERROR:</p>";
+      errDisp.innerHTML += "Something went wrong!<br>";
+      errDisp.innerHTML += "Could not get data from server!<br>";
+      errDisp.innerHTML += "Please refresh the page.";
+      errDisp.classList.remove("hidden");
+    }
 
     loading.classList.add("hidden"); // emit this to stores energies from sun and moon base set from server
 
@@ -97,13 +107,18 @@ window.onload = function () {
   }); // send error to console
 
   socket.on('error', function (err) {
-    console.log(err);
+    errDisp.innerHTML = "<p class=\"header\">ERROR:</p>";
+    errDisp.innerHTML += "Something went wrong!<br>";
+    errDisp.innerHTML += "Please report the following to the dev:<br>";
+    errDisp.innerHTML += err;
+    errDisp.classList.remove("hidden");
   }); // generate packs and display them
 
   var showCards = function showCards() {
     // empty array to hold current pack
     var packArr = [];
-    var holo = true;
+    var holo = true; // for use in show/get booster art
+
     var boosterArt = ""; // divide current set by rarities
 
     var currSetComm = currSet.filter(function (card) {
@@ -189,7 +204,7 @@ window.onload = function () {
       shuffle(retArr); // reverse slot
 
       if (amazing) retArr.push(randCard(currSetAmaz));else if (energy && useSmEnergies) retArr.push(randCard(smEnergies));else if (random(0, totalOdds) < rareOdds.revRare) {
-        if (random(0, totalOdds) < rareOdds.holo) retArr.push(randCard(currSetHolo));else retArr.push(randCard(currSetRare));
+        if (random(0, totalOdds) < rareOdds.holo || guaranteeHolo) retArr.push(randCard(currSetHolo));else retArr.push(randCard(currSetRare));
       } else if (random(0, totalOdds) < rareOdds.uncomRev) retArr.push(randCard(currSetUncomm));else retArr.push(randCard(currSetComm)); // rare slot
 
       if (random(0, totalOdds) < rareOdds.sec) retArr.push(randCard(currSetSec));else if (random(0, totalOdds) < rareOdds.rain) retArr.push(randCard(currSetRain));else if (random(0, totalOdds) < rareOdds.ult) retArr.push(randCard(currSetUlt));else if (random(0, totalOdds) < rareOdds.vmax) retArr.push(randCard(currSetVMax));else if (random(0, totalOdds) < rareOdds.v) retArr.push(randCard(currSetV));else if (random(0, totalOdds) < rareOdds.holo || guaranteeHolo) retArr.push(randCard(currSetHolo));else {
@@ -279,7 +294,6 @@ window.onload = function () {
       var div = document.createElement('div');
       var img = document.createElement('img');
       flex.classList.add("center");
-      div.classList.add("holo");
       div.classList.add("booster-container");
       img.classList.add("booster-art");
       img.classList.add("tilt1");
@@ -303,7 +317,19 @@ window.onload = function () {
 
       child.classList.add("zoom"); // remove hidden class from loading
 
-      loading.classList.remove("hidden"); // format pack
+      loading.classList.remove("hidden"); // handle showing an error if applicable
+
+      errDisp.classList.add("hidden"); // reset timeout for error checking
+
+      clearTimeout(errCheck);
+      errCheck = setTimeout(function () {
+        if (loading.classList.length == 0) {
+          errDisp.innerHTML = "<p class=\"header\">ERROR:</p>";
+          errDisp.innerHTML += "It seems like something went wrong...<br>";
+          errDisp.innerHTML += "Please refresh and try again.";
+          errDisp.classList.remove("hidden");
+        }
+      }, 5000); // format pack
 
       var _loop = function _loop(_i2) {
         var div = document.createElement('div');
@@ -311,10 +337,11 @@ window.onload = function () {
         div.classList.add("card");
         div.classList.add("tilt1");
         div.classList.add("hidden");
-        div.style.zIndex = 100 - _i2; // if last card in pack, remove loading
+        div.style.zIndex = 100 - _i2; // if last card in pack, remove loading and err message
 
         if (_i2 == packArr.length - 1) img.onload = function () {
           loading.classList.add("hidden");
+          errDisp.classList.add("hidden");
         };
         img.src = packArr[_i2].images.small;
         tilt1 = true; // do this for modern completed sets
@@ -437,14 +464,16 @@ window.onload = function () {
 
             continue;
           }
-        } // update innerhtml for new p element
+        } // create header
 
+
+        p.innerHTML = "<p class=\"header\">PRICE:</p>"; // update innerhtml for new p element
 
         if (!noPrices) {
-          p.innerHTML = "Your pack is worth: <b>$" + price.toFixed(2) + "</b>.<br>";
+          p.innerHTML += "Your pack is worth: <b>$" + price.toFixed(2) + "</b>.<br>";
           p.innerHTML += "Your best hit was: <b>" + packArr[highestIndex].name + "</b> at <b>$" + highest.toFixed(2) + "</b>.";
         } else {
-          p.innerHTML = "This pack is missing at least one card on TCGPlayer, and therefore cannot be valued. <br>";
+          p.innerHTML += "This pack is missing at least one card on TCGPlayer, and therefore cannot be valued. <br>";
           p.innerHTML += "Apologies for the inconvenience.";
         }
 
@@ -483,31 +512,4 @@ var shuffle = function shuffle(arr) {
     arr[i] = _ref[0];
     arr[j] = _ref[1];
   }
-}; // fading elements in/out helper functions
-
-
-var fade = function fade(el1, el2) {
-  el1.style.opacity = "0";
-  setTimeout(function () {
-    el1.style.display = "none";
-    el2.style.display = "block";
-    setTimeout(function () {
-      el2.style.opacity = "100";
-    }, 50);
-  }, 500);
-};
-
-var fadeOut = function fadeOut(el) {
-  el.style.opacity = "0";
-  setTimeout(function () {
-    el.style.display = "none";
-  }, 500);
-};
-
-var fadeIn = function fadeIn(el) {
-  var displayType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "block";
-  el.style.display = displayType;
-  setTimeout(function () {
-    el.style.opacity = "100";
-  }, 50);
 };
