@@ -21,7 +21,8 @@ window.onload = function () {
   var tilt1 = true; // used for synchronizing animations after putting cards back
 
   var errCheck; // use this so only one setTimeout is going at a time in open()
-  // get setIDs upon load
+
+  var completedSets = ["swsh1", "swsh2", "swsh3", "swsh35", "swsh4"]; // get setIDs upon load
 
   socket.on('start', function (sets) {
     setData = JSON.parse(sets);
@@ -32,7 +33,15 @@ window.onload = function () {
 
     for (var i = 0; i < setIDs.length; i++) {
       var option = document.createElement("option");
-      option.text = setData[setIDs[i]];
+      option.text = setData[setIDs[i]]; // add checkmark to completed sets
+
+      for (var j = 0; j < completedSets.length; j++) {
+        if (completedSets[j] == setIDs[i]) {
+          option.text += " ✓";
+          break;
+        }
+      }
+
       setDropdown.add(option);
     } // enable items and restore last selection (if applicable)
 
@@ -60,9 +69,10 @@ window.onload = function () {
 
 
   setSubmit.onclick = function () {
-    // get ID from name
+    var setName = setDropdown.value.indexOf("✓") > -1 ? setDropdown.value.slice(0, setDropdown.value.length - 2) : setDropdown.value; // get ID from name
+
     for (var i = 0; i < setIDs.length; i++) {
-      if (setData[setIDs[i]] == setDropdown.value) currSetID = setIDs[i];
+      if (setData[setIDs[i]] == setName) currSetID = setIDs[i];
     } // only emit if it is not in localstorage, otherwise pull from localstorage
 
 
@@ -223,25 +233,71 @@ window.onload = function () {
 
         break;
 
-      case "swsh4":
-        // vivid voltage data from https://cardzard.com/blogs/news/vivid-voltage-pull-rate-data
-        packArr = getPack("amazing", 5, 2184, {
-          // 5% chance for amazing, x/2184 for whole set
-          revRare: 1313,
-          // 60% chance for reverse slot rare (same as regular chances of non-holo rare)
-          holo: 366,
-          // 16.76% chance for holo
-          uncomRev: 764,
-          // 35% chance for uncommon reverse slot over common, this one is a guess
-          sec: 23,
-          // 1.05% chance for golden
-          rain: 31,
-          // 1.42% chance for rainbow
-          ult: 89,
-          // 4.07% chance for ultra rare
-          vmax: 91,
-          // 4.17% chance for VMAX
-          v: 271 // 12.41 chance for V
+      case "swsh1":
+        // swsh base data from https://efour.proboards.com/thread/16380/pull-rates-modern-sets
+        packArr = getPack("none", 0, 4628, {
+          // no insert for rev slot, x/4628 for whole set
+          revRare: 2777,
+          // 60% chance for reverse slot rare (a guess based on VV data)
+          holo: 776,
+          // 16.76% chance for holo (a guess from VV)
+          uncomRev: 1574,
+          // 34% chance for uncommon reverse slot over common, this one is a guess
+          sec: 42,
+          // 0.91% chance for secret
+          rain: 57,
+          // 1.23% chance for rainbow
+          ult: 173,
+          // 3.74% chance for ultra rare
+          vmax: 102,
+          // 2.20% chance for VMAX
+          v: 657 // 14.20% chance for V
+
+        });
+        break;
+
+      case "swsh2":
+        // RC data from https://efour.proboards.com/thread/16380/pull-rates-modern-sets
+        packArr = getPack("none", 0, 2736, {
+          // no insert for rev slot, x/2736 for whole set
+          revRare: 1642,
+          // 60% chance for reverse slot rare (a guess based on VV data)
+          holo: 459,
+          // 16.76% chance for holo (a guess from VV)
+          uncomRev: 930,
+          // 34% chance for uncommon reverse slot over common, this one is a guess
+          sec: 26,
+          // 0.95% chance for secret
+          rain: 41,
+          // 1.50% chance for rainbow
+          ult: 103,
+          // 3.76% chance for ultra rare
+          vmax: 93,
+          // 3.40% chance for VMAX
+          v: 346 // 12.65% chance for V
+
+        });
+        break;
+
+      case "swsh3":
+        // DA data from https://efour.proboards.com/thread/16380/pull-rates-modern-sets
+        packArr = getPack("none", 0, 5040, {
+          // no insert for rev slot, x/5040 for whole set
+          revRare: 3024,
+          // 60% chance for reverse slot rare (a guess based on VV data)
+          holo: 845,
+          // 16.76% chance for holo (a guess from VV)
+          uncomRev: 1764,
+          // 34% chance for uncommon reverse slot over common, this one is a guess
+          sec: 44,
+          // 0.87% chance for secret
+          rain: 60,
+          // 1.19% chance for rainbow
+          ult: 194,
+          // 3.85% chance for ultra rare
+          vmax: 194,
+          // 3.85% chance for VMAX
+          v: 634 // 12.58% chance for V
 
         });
         break;
@@ -266,7 +322,31 @@ window.onload = function () {
           // 17.03% chance for VMAX
           v: 248 // 17.03% chance for V
 
-        }, true);
+        }, true); // guarantee holo--a fallback
+
+        break;
+
+      case "swsh4":
+        // vivid voltage data from https://cardzard.com/blogs/news/vivid-voltage-pull-rate-data
+        packArr = getPack("amazing", 5, 2184, {
+          // 5% chance for amazing, x/2184 for whole set
+          revRare: 1313,
+          // 60% chance for reverse slot rare (same as regular chances of non-holo rare)
+          holo: 366,
+          // 16.76% chance for holo
+          uncomRev: 764,
+          // 35% chance for uncommon reverse slot over common, this one is a guess
+          sec: 23,
+          // 1.05% chance for golden
+          rain: 31,
+          // 1.42% chance for rainbow
+          ult: 89,
+          // 4.07% chance for ultra rare
+          vmax: 91,
+          // 4.17% chance for VMAX
+          v: 271 // 12.41 chance for V
+
+        });
         break;
     } // clear pack innerHTML and 
 
@@ -346,10 +426,13 @@ window.onload = function () {
         img.src = packArr[_i2].images.small;
         tilt1 = true; // do this for modern completed sets
 
-        if (currSetID === "swsh4" || currSetID === "swsh35") {
-          if (packArr[_i2].supertype == "Energy" && !packArr[_i2].subtypes) img.classList.add("sm-energy"); // add holo class to reverse and end holo
+        for (var j = 0; j < completedSets.length; j++) {
+          if (completedSets[j] == currSetID) {
+            if (packArr[_i2].supertype == "Energy" && packArr[_i2].subtypes[0] == "Basic") img.classList.add("sm-energy"); // add holo class to reverse and end holo
 
-          if (holo && _i2 == packArr.length - 1 || _i2 == packArr.length - 2) div.classList.add("holo");
+            if (holo && _i2 == packArr.length - 1 || _i2 == packArr.length - 2) div.classList.add("holo");
+            break;
+          }
         }
 
         div.onclick = function () {
