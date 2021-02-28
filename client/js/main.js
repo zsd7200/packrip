@@ -327,10 +327,12 @@ window.onload = () => {
             let flex = document.createElement('div');
             let div = document.createElement('div');
             let img = document.createElement('img');
+            loading.classList.remove("hidden");
             flex.classList.add("center");
             div.classList.add("booster-container");
             img.classList.add("booster-art");
             img.classList.add("tilt1");
+            img.onload = () => { loading.classList.add("hidden"); };
             img.src = imgSrc;
             flex.onclick = () => { open(flex, div); };
             flex.appendChild(div);

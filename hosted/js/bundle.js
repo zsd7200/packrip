@@ -373,10 +373,16 @@ window.onload = function () {
       var flex = document.createElement('div');
       var div = document.createElement('div');
       var img = document.createElement('img');
+      loading.classList.remove("hidden");
       flex.classList.add("center");
       div.classList.add("booster-container");
       img.classList.add("booster-art");
       img.classList.add("tilt1");
+
+      img.onload = function () {
+        loading.classList.add("hidden");
+      };
+
       img.src = imgSrc;
 
       flex.onclick = function () {
