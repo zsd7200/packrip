@@ -347,7 +347,7 @@ window.onload = function () {
         tilt1 = true; // do this for modern completed sets
 
         if (currSetID === "swsh4" || currSetID === "swsh35") {
-          if (packArr[_i2].supertype == "Energy") img.classList.add("sm-energy"); // add holo class to reverse and end holo
+          if (packArr[_i2].supertype == "Energy" && !packArr[_i2].subtypes) img.classList.add("sm-energy"); // add holo class to reverse and end holo
 
           if (holo && _i2 == packArr.length - 1 || _i2 == packArr.length - 2) div.classList.add("holo");
         }

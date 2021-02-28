@@ -336,7 +336,7 @@ window.onload = () => {
                 
                 // do this for modern completed sets
                 if(currSetID === "swsh4" || currSetID === "swsh35") {
-                    if(packArr[i].supertype == "Energy")
+                    if(packArr[i].supertype == "Energy" && !packArr[i].subtypes)
                         img.classList.add("sm-energy");
                     
                     // add holo class to reverse and end holo
