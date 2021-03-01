@@ -1,4 +1,6 @@
-# [Pokemon TCG Pack Simulator](https://ripapack.herokuapp.com/)
+# [Pokemon TCG Pack Simulator](http://www.openpkmn.cards/)
+Also available at https://ripapack.herokuapp.com/.
+
 Pokémon TCG pack opening simulator. Uses the [Pokémon TCG API](https://pokemontcg.io/) to get card/set data, and pull rate data from various sources in an attempt to be accurate to each set's own pull rates.
 
 Currently completed sets:
