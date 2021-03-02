@@ -50,7 +50,7 @@ window.onload = function () {
 
   var errCheck; // use this so only one setTimeout is going at a time in open()
 
-  var completedSets = ["sm1", "sm2", "sm3", "sm4", "sm5", "sm6", "sm7", "sm8", "sm9", "sm10", "sm11", "sm12", "swsh1", "swsh2", "swsh3", "swsh35", "swsh4"];
+  var completedSets = ["sm1", "sm2", "sm3", "sm4", "sm5", "sm6", "sm7", "sm75", "sm8", "sm9", "sm10", "sm11", "sm12", "swsh1", "swsh2", "swsh3", "swsh35", "swsh4"];
   var socket = io(); // get setIDs upon load
 
   socket.on('start', function (sets) {

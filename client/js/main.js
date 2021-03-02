@@ -20,8 +20,8 @@ window.onload = () => {
 	let tilt1 = true;	   // used for synchronizing animations after putting cards back
 	let errCheck;		   // use this so only one setTimeout is going at a time in open()
 	let completedSets = [
-		"sm1", "sm2", "sm3", "sm4", "sm5", "sm6",
-		"sm7", "sm8", "sm9", "sm10", "sm11", "sm12",
+		"sm1", "sm2", "sm3", "sm4", "sm5", "sm6", "sm7",
+		"sm75", "sm8", "sm9", "sm10", "sm11", "sm12",
 		"swsh1", "swsh2", "swsh3", "swsh35", "swsh4"
 	];
 	let socket = io();
