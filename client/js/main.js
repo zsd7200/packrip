@@ -1,7 +1,7 @@
 /*
 MAIN.JS
 
-Loads DOM elements upon window load, 
+Loads DOM elements upon window load, gets pack data from server, and displays cards to user.
 */
 
 window.onload = () => {
@@ -78,7 +78,7 @@ window.onload = () => {
 	
 	// send request for set
 	setSubmit.onclick = () => {
-		const setName = (setDropdown.value.indexOf("✓") > -1) ? setDropdown.value.slice(0,setDropdown.value.length - 2) : setDropdown.value;
+		const setName = (setDropdown.value.indexOf("✓") > -1) ? setDropdown.value.slice(0, setDropdown.value.length - 2) : setDropdown.value;
 		
 		// get ID from name
 		for(let i = 0; i < setIDs.length; i++)
@@ -96,7 +96,7 @@ window.onload = () => {
 		
 		errDisp.classList.add("hidden");
 		
-		console.log(currSetID);
+		// console.log(currSetID);
 	};
 	
 	// energy storage
@@ -104,7 +104,7 @@ window.onload = () => {
 		for(let i = 164; i < data.length; i++)
 			smEnergies.push(data[i]);
 		
-		localStorage.setItem(lsKey + "smEnergy",JSON.stringify(smEnergies));
+		localStorage.setItem(lsKey + "smEnergy", JSON.stringify(smEnergies));
 	});
 	
 	// hide loading icon and set localstorage data
@@ -112,7 +112,7 @@ window.onload = () => {
 		loading.classList.add("hidden");
 		
 		// try to store new set data in localStorage
-		try { localStorage.setItem(lsKey + setID,JSON.stringify(data)); }
+		try { localStorage.setItem(lsKey + setID, JSON.stringify(data)); }
 		catch(err) {
 			// store data to put back into localStorage
 			let selection,energy;
@@ -121,9 +121,9 @@ window.onload = () => {
 			
 			// clear localstorage and restore some old data
 			localStorage.clear();
-			localStorage.setItem(lsKey + "selection",selection);
-			localStorage.setItem(lsKey + "smEnergy",energy);
-			localStorage.setItem(lsKey + setID,JSON.stringify(data));
+			localStorage.setItem(lsKey + "selection", selection);
+			localStorage.setItem(lsKey + "smEnergy", energy);
+			localStorage.setItem(lsKey + setID, JSON.stringify(data));
 		}
 		
 		currSet = data;
@@ -169,7 +169,7 @@ window.onload = () => {
 			// loops until dupe is false
 			do {
 				dupe = false;
-				rand = randomInt(0,set.length);
+				rand = randomInt(0, set.length);
 				
 				for(let i = 0; i < currPack.length; i++) {
 					// also check if it's an energy 
@@ -192,7 +192,7 @@ window.onload = () => {
 			let rand;
 			
 			do {
-				rand = randomInt(0,set.length);
+				rand = randomInt(0, set.length);
 				
 				if(set[rand].supertype == supertype)
 					loop = false;
@@ -203,7 +203,7 @@ window.onload = () => {
 		};
 		
 		// get a random card from the entirety of your given set
-		let randCard = (set) => { return set[randomInt(0,set.length)]; };
+		let randCard = (set) => { return set[randomInt(0, set.length)]; };
 		
 		// gets a pack from a set of parameters,
 		// most likely won't be used for older sets,
@@ -214,12 +214,12 @@ window.onload = () => {
 					   useSmEnergies = true,) => {
 
 			let retArr = [];
-			const comm = randomInt(0,5) + 4;
+			const comm = randomInt(0, 5) + 4;
 			const uncom = 8 - comm;
-			const prism = (reverse == "prism" && randomFixed(0,100) < revPerc) ? true : false;
-			const secMon = (reverse == "sec-mon" && randomFixed(0,100) < revPerc) ? true : false;
-			const energy = (reverse == "energy" && randomFixed(0,100) < revPerc) ? true : false;
-			const amazing = (reverse == "amazing" && randomFixed(0,100) < revPerc) ? true : false;
+			const prism = (reverse == "prism" && randomFixed(0, 100) < revPerc) ? true : false;
+			const secMon = (reverse == "sec-mon" && randomFixed(0, 100) < revPerc) ? true : false;
+			const energy = (reverse == "energy" && randomFixed(0, 100) < revPerc) ? true : false;
+			const amazing = (reverse == "amazing" && randomFixed(0, 100) < revPerc) ? true : false;
 			
 			// fill up common and uncommon slots
 			for(let i = 0; i < comm; i++)
@@ -240,37 +240,37 @@ window.onload = () => {
 				retArr.push(randCard(smEnergies));
 			else if(amazing)
 				retArr.push(randCard(currSetAmaz));
-			else if(randomFixed(0,100) < rareOdds.revRare) {
-				if(randomFixed(0,100) < rareOdds.holo)
+			else if(randomFixed(0, 100) < rareOdds.revRare) {
+				if(randomFixed(0, 100) < rareOdds.holo)
 					retArr.push(randCard(currSetHolo));
 				else
 					retArr.push(randCard(currSetRare));
 			} 
-			else if(randomFixed(0,100) < rareOdds.uncomRev)
+			else if(randomFixed(0, 100) < rareOdds.uncomRev)
 				retArr.push(randCard(currSetUncomm));
 			else
 				retArr.push(randCard(currSetComm));
 			
 			// rare slot
-			if(randomFixed(0,100) < rareOdds.sec)
+			if(randomFixed(0, 100) < rareOdds.sec)
 				retArr.push(randCard(currSetSec));
-			else if(randomFixed(0,100) < rareOdds.rain)
+			else if(randomFixed(0, 100) < rareOdds.rain)
 				retArr.push(randCard(currSetRain));
-			else if(randomFixed(0,100) < rareOdds.ult)
+			else if(randomFixed(0, 100) < rareOdds.ult)
 				retArr.push(randCard(currSetUlt));
 			else if(rareOdds.vmax) {
-				if(randomFixed(0,100) < rareOdds.vmax)
+				if(randomFixed(0, 100) < rareOdds.vmax)
 					retArr.push(randCard(currSetVMax));
-				else if(randomFixed(0,100) < rareOdds.v)
+				else if(randomFixed(0, 100) < rareOdds.v)
 					retArr.push(randCard(currSetV));
 			} else if(rareOdds.gx) {
-				if(randomFixed(0,100) < rareOdds.gx)
+				if(randomFixed(0, 100) < rareOdds.gx)
 					retArr.push(randCard(currSetGX));
 			}
 			
 			// if rare hasn't been selected, go to these conditions
 			if(retArr.length == 9) {
-				if(randomFixed(0,100) < rareOdds.holo)
+				if(randomFixed(0, 100) < rareOdds.holo)
 					retArr.push(randCard(currSetHolo));
 				else {
 					retArr.push(randCard(currSetRare));
@@ -563,12 +563,12 @@ window.onload = () => {
 			clearTimeout(errCheck);
 			errCheck = setTimeout(() => {
 				if(loading.classList.length == 0) {
-					errDisp.innerHTML = `<p class="header">ERROR:</p>`;
-					errDisp.innerHTML += "It seems like something went wrong...<br>";
-					errDisp.innerHTML += "Please refresh and try again.";
+					errDisp.innerHTML = `<p class="header">NOTICE:</p>`;
+					errDisp.innerHTML += "This seems to be taking a while...<br>";
+					errDisp.innerHTML += "If this persists, please refresh and try again.";
 					errDisp.classList.remove("hidden");
 				}
-			},5000);
+			}, 10000);
 			
 			// format pack
 			for(let i = 0; i < packArr.length; i++) {
@@ -578,9 +578,14 @@ window.onload = () => {
 				div.classList.add("tilt1");
 				div.classList.add("hidden");
 				div.style.zIndex = 100 - i;
-				// if last card in pack, remove loading and err message
+				
+				// if last card in pack, remove loading and err message and add onclick to first child
 				if(i == packArr.length - 1)
-					img.onload = () => { loading.classList.add("hidden"); errDisp.classList.add("hidden"); };
+					img.onload = () => { 
+						loading.classList.add("hidden"); 
+						errDisp.classList.add("hidden"); 
+						parent.childNodes[0].onclick = () => { moveCard(0, parent); };
+					};
 				
 				img.src = packArr[i].images.small;
 				tilt1 = true;
@@ -597,9 +602,13 @@ window.onload = () => {
 						
 						break;
 					}
-					
 				
-				div.onclick = () => { moveCard(i,parent); };
+				// the first child's onclick gets set later, once all the images have loaded
+				// this is done to prevent any weirdness by cycling through cards really fast 
+				// before all of the images have loaded
+				if(i != 0)
+					div.onclick = () => { moveCard(i, parent); };
+				
 				div.appendChild(img);
 				parent.appendChild(div);
 			}
@@ -609,7 +618,7 @@ window.onload = () => {
 				child.remove();
 				for(let i = 0; i < parent.childNodes.length; i++)
 					parent.childNodes[i].classList.remove("hidden");
-			},500);
+			}, 500);
 		};
 		
 		let moveCard = (cardIndex,parent) => {
@@ -641,7 +650,7 @@ window.onload = () => {
 							parent.childNodes[i].classList.add("tilt2");
 						else
 							parent.childNodes[i].classList.add("tilt1");
-					},10);
+					}, 10);
 				}
 				
 				// swap tilt variable
@@ -710,7 +719,7 @@ window.onload = () => {
 					p.innerHTML += "Your pack is worth: <b>$" + price.toFixed(2) + "</b>.<br>";
 					p.innerHTML += "Your best hit was: <b>" + packArr[highestIndex].name + "</b> at <b>$" + highest.toFixed(2) + "</b>.";
 				} else {
-					p.innerHTML += "This pack is missing at least one card on TCGPlayer, and therefore cannot be valued. <br>";
+					p.innerHTML += "This pack is missing at least one card on TCGPlayer, and therefore cannot be accurately valued. <br>";
 					p.innerHTML += "Apologies for the inconvenience.";
 				}
 				

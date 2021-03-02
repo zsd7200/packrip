@@ -29,7 +29,7 @@ var shuffle = function shuffle(arr) {
 /*
 MAIN.JS
 
-Loads DOM elements upon window load, 
+Loads DOM elements upon window load, gets pack data from server, and displays cards to user.
 */
 
 
@@ -113,8 +113,7 @@ window.onload = function () {
       showCards();
     }
 
-    errDisp.classList.add("hidden");
-    console.log(currSetID);
+    errDisp.classList.add("hidden"); // console.log(currSetID);
   }; // energy storage
 
 
@@ -601,12 +600,12 @@ window.onload = function () {
       clearTimeout(errCheck);
       errCheck = setTimeout(function () {
         if (loading.classList.length == 0) {
-          errDisp.innerHTML = "<p class=\"header\">ERROR:</p>";
-          errDisp.innerHTML += "It seems like something went wrong...<br>";
-          errDisp.innerHTML += "Please refresh and try again.";
+          errDisp.innerHTML = "<p class=\"header\">NOTICE:</p>";
+          errDisp.innerHTML += "This seems to be taking a while...<br>";
+          errDisp.innerHTML += "If this persists, please refresh and try again.";
           errDisp.classList.remove("hidden");
         }
-      }, 5000); // format pack
+      }, 10000); // format pack
 
       var _loop = function _loop(_i2) {
         var div = document.createElement('div');
@@ -614,11 +613,15 @@ window.onload = function () {
         div.classList.add("card");
         div.classList.add("tilt1");
         div.classList.add("hidden");
-        div.style.zIndex = 100 - _i2; // if last card in pack, remove loading and err message
+        div.style.zIndex = 100 - _i2; // if last card in pack, remove loading and err message and add onclick to first child
 
         if (_i2 == packArr.length - 1) img.onload = function () {
           loading.classList.add("hidden");
           errDisp.classList.add("hidden");
+
+          parent.childNodes[0].onclick = function () {
+            moveCard(0, parent);
+          };
         };
         img.src = packArr[_i2].images.small;
         tilt1 = true; // do this for modern completed sets
@@ -630,12 +633,14 @@ window.onload = function () {
             if (holo && _i2 == packArr.length - 1 || _i2 == packArr.length - 2) div.classList.add("holo");
             break;
           }
-        }
+        } // the first child's onclick gets set later, once all the images have loaded
+        // this is done to prevent any weirdness by cycling through cards really fast 
+        // before all of the images have loaded
 
-        div.onclick = function () {
+
+        if (_i2 != 0) div.onclick = function () {
           moveCard(_i2, parent);
         };
-
         div.appendChild(img);
         parent.appendChild(div);
       };
@@ -752,7 +757,7 @@ window.onload = function () {
           p.innerHTML += "Your pack is worth: <b>$" + price.toFixed(2) + "</b>.<br>";
           p.innerHTML += "Your best hit was: <b>" + packArr[highestIndex].name + "</b> at <b>$" + highest.toFixed(2) + "</b>.";
         } else {
-          p.innerHTML += "This pack is missing at least one card on TCGPlayer, and therefore cannot be valued. <br>";
+          p.innerHTML += "This pack is missing at least one card on TCGPlayer, and therefore cannot be accurately valued. <br>";
           p.innerHTML += "Apologies for the inconvenience.";
         }
 
