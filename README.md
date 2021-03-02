@@ -4,6 +4,19 @@ Also available at https://ripapack.herokuapp.com/.
 Pokémon TCG pack opening simulator. Uses the [Pokémon TCG API](https://pokemontcg.io/) to get card/set data, and pull rate data from various sources in an attempt to be accurate to each set's own pull rates.
 
 Currently completed sets:
+- Sun and Moon (sm1)
+- Guardians Rising (sm2)
+- Burning Shadows (sm3)
+- Crimson Invasion (sm4)
+- Ultra Prism (sm5)
+- Forbidden Light (sm6)
+- Celestial Storm (sm7)
+- Dragon Majesty (sm75)
+- Lost Thunder (sm8)
+- Team Up (sm9)
+- Unbroken Bonds (sm10)
+- Unified Minds (sm11)
+- Cosmic Eclipse (sm12)
 - Sword and Shield (swsh1)
 - Rebel Clash (swsh2)
 - Darkness Ablaze (swsh3)

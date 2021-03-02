@@ -1,10 +1,38 @@
 "use strict";
 
 /*
+HELPERS.js
+
+Helper functions.
+*/
+// random int
+var randomInt = function randomInt(min, max) {
+  return Math.floor(Math.random() * max) + min;
+}; // random with two decimal places
+
+
+var randomFixed = function randomFixed(min, max) {
+  var num = Math.random() * max + min;
+  return num.toFixed(2);
+}; // shuffle array
+// taken from https://javascript.info/task/shuffle
+
+
+var shuffle = function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = randomInt(0, i);
+    var _ref = [arr[j], arr[i]];
+    arr[i] = _ref[0];
+    arr[j] = _ref[1];
+  }
+};
+/*
 MAIN.JS
 
-Loads DOM elements upon window load, handles input, handles dark mode, and more.
+Loads DOM elements upon window load, 
 */
+
+
 window.onload = function () {
   var loading = document.querySelector("#lds-ring");
   var errDisp = document.querySelector("#err-disp");
@@ -22,7 +50,8 @@ window.onload = function () {
 
   var errCheck; // use this so only one setTimeout is going at a time in open()
 
-  var completedSets = ["swsh1", "swsh2", "swsh3", "swsh35", "swsh4"]; // get setIDs upon load
+  var completedSets = ["sm1", "sm2", "sm3", "sm4", "sm5", "sm6", "sm7", "sm8", "sm9", "sm10", "sm11", "sm12", "swsh1", "swsh2", "swsh3", "swsh35", "swsh4"];
+  var socket = io(); // get setIDs upon load
 
   socket.on('start', function (sets) {
     setData = JSON.parse(sets);
@@ -82,8 +111,10 @@ window.onload = function () {
     } else {
       currSet = JSON.parse(localStorage.getItem(lsKey + currSetID));
       showCards();
-    } // console.log(currSetID);
+    }
 
+    errDisp.classList.add("hidden");
+    console.log(currSetID);
   }; // energy storage
 
 
@@ -160,6 +191,12 @@ window.onload = function () {
     });
     var currSetAmaz = currSet.filter(function (card) {
       return card.rarity == "Amazing Rare";
+    });
+    var currSetGX = currSet.filter(function (card) {
+      return card.rarity == "Rare Holo GX";
+    });
+    var currSetPrism = currSet.filter(function (card) {
+      return card.rarity == "Rare Prism Star";
     }); // check for duplicate cards
 
     var dupeCheck = function dupeCheck(currPack, set) {
@@ -167,10 +204,12 @@ window.onload = function () {
 
       do {
         dupe = false;
-        rand = random(0, set.length);
+        rand = randomInt(0, set.length);
 
         for (var i = 0; i < currPack.length; i++) {
-          if (currPack[i] == set[rand]) {
+          // also check if it's an energy 
+          // only really applicable to sm1
+          if (currPack[i] == set[rand] || set[rand].supertype == "Energy" && set[rand].subtypes[0] == "Basic") {
             dupe = true;
             break;
           }
@@ -179,11 +218,25 @@ window.onload = function () {
 
 
       return set[rand];
+    }; // get a specific kind of secret rare
+    // currently only used for cosmic eclipse
+
+
+    var getSpecificSec = function getSpecificSec(supertype, set) {
+      var loop = true;
+      var rand;
+
+      do {
+        rand = randomInt(0, set.length);
+        if (set[rand].supertype == supertype) loop = false;
+      } while (loop);
+
+      return set[rand];
     }; // get a random card from the entirety of your given set
 
 
     var randCard = function randCard(set) {
-      return set[random(0, set.length)];
+      return set[randomInt(0, set.length)];
     }; // gets a pack from a set of parameters,
     // most likely won't be used for older sets,
     // but good for newer sets
@@ -192,15 +245,15 @@ window.onload = function () {
     var getPack = function getPack() {
       var reverse = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "none";
       var revPerc = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
-      var totalOdds = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
-      var rareOdds = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-      var guaranteeHolo = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
-      var useSmEnergies = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : true;
+      var rareOdds = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var useSmEnergies = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
       var retArr = [];
-      var comm = random(0, 5) + 4;
+      var comm = randomInt(0, 5) + 4;
       var uncom = 8 - comm;
-      var amazing = reverse == "amazing" && random(0, 100) < revPerc ? true : false;
-      var energy = reverse == "energy" && random(0, 100) < revPerc ? true : false; // fill up common and uncommon slots
+      var prism = reverse == "prism" && randomFixed(0, 100) < revPerc ? true : false;
+      var secMon = reverse == "sec-mon" && randomFixed(0, 100) < revPerc ? true : false;
+      var energy = reverse == "energy" && randomFixed(0, 100) < revPerc ? true : false;
+      var amazing = reverse == "amazing" && randomFixed(0, 100) < revPerc ? true : false; // fill up common and uncommon slots
 
       for (var i = 0; i < comm; i++) {
         retArr.push(dupeCheck(retArr, currSetComm));
@@ -213,17 +266,48 @@ window.onload = function () {
 
       shuffle(retArr); // reverse slot
 
-      if (amazing) retArr.push(randCard(currSetAmaz));else if (energy && useSmEnergies) retArr.push(randCard(smEnergies));else if (random(0, totalOdds) < rareOdds.revRare) {
-        if (random(0, totalOdds) < rareOdds.holo || guaranteeHolo) retArr.push(randCard(currSetHolo));else retArr.push(randCard(currSetRare));
-      } else if (random(0, totalOdds) < rareOdds.uncomRev) retArr.push(randCard(currSetUncomm));else retArr.push(randCard(currSetComm)); // rare slot
+      if (prism) retArr.push(randCard(currSetPrism));else if (secMon) retArr.push(getSpecificSec("Pokémon", currSetSec));else if (energy && useSmEnergies) retArr.push(randCard(smEnergies));else if (amazing) retArr.push(randCard(currSetAmaz));else if (randomFixed(0, 100) < rareOdds.revRare) {
+        if (randomFixed(0, 100) < rareOdds.holo) retArr.push(randCard(currSetHolo));else retArr.push(randCard(currSetRare));
+      } else if (randomFixed(0, 100) < rareOdds.uncomRev) retArr.push(randCard(currSetUncomm));else retArr.push(randCard(currSetComm)); // rare slot
 
-      if (random(0, totalOdds) < rareOdds.sec) retArr.push(randCard(currSetSec));else if (random(0, totalOdds) < rareOdds.rain) retArr.push(randCard(currSetRain));else if (random(0, totalOdds) < rareOdds.ult) retArr.push(randCard(currSetUlt));else if (random(0, totalOdds) < rareOdds.vmax) retArr.push(randCard(currSetVMax));else if (random(0, totalOdds) < rareOdds.v) retArr.push(randCard(currSetV));else if (random(0, totalOdds) < rareOdds.holo || guaranteeHolo) retArr.push(randCard(currSetHolo));else {
-        retArr.push(randCard(currSetRare));
-        holo = false;
+      if (randomFixed(0, 100) < rareOdds.sec) retArr.push(randCard(currSetSec));else if (randomFixed(0, 100) < rareOdds.rain) retArr.push(randCard(currSetRain));else if (randomFixed(0, 100) < rareOdds.ult) retArr.push(randCard(currSetUlt));else if (rareOdds.vmax) {
+        if (randomFixed(0, 100) < rareOdds.vmax) retArr.push(randCard(currSetVMax));else if (randomFixed(0, 100) < rareOdds.v) retArr.push(randCard(currSetV));
+      } else if (rareOdds.gx) {
+        if (randomFixed(0, 100) < rareOdds.gx) retArr.push(randCard(currSetGX));
+      } // if rare hasn't been selected, go to these conditions
+
+      if (retArr.length == 9) {
+        if (randomFixed(0, 100) < rareOdds.holo) retArr.push(randCard(currSetHolo));else {
+          retArr.push(randCard(currSetRare));
+          holo = false;
+        }
       }
-      if (useSmEnergies) retArr.unshift(randCard(smEnergies));
+
+      if (useSmEnergies) {
+        var card = randCard(smEnergies); // prevent fairy energy in swsh sets
+
+        if (currSetID.indexOf("swsh") > -1) {
+          var isFairy;
+
+          do {
+            isFairy = false;
+
+            if (card.name == "Fairy Energy") {
+              isFairy = true;
+              card = randCard(smEnergies);
+            }
+          } while (isFairy);
+        } // place energy in front
+
+
+        retArr.unshift(card);
+      }
+
       return retArr;
-    };
+    }; // most modern set pull rate data taken from here:
+    // https://efour.proboards.com/thread/16380/pull-rates-modern-sets
+    // if not from there, it will be specified
+
 
     switch (currSetID) {
       default:
@@ -233,119 +317,226 @@ window.onload = function () {
 
         break;
 
-      case "swsh1":
-        // swsh base data from https://efour.proboards.com/thread/16380/pull-rates-modern-sets
-        packArr = getPack("none", 0, 4628, {
-          // no insert for rev slot, x/4628 for whole set
-          revRare: 2777,
-          // 60% chance for reverse slot rare (a guess based on VV data)
-          holo: 776,
-          // 16.76% chance for holo (a guess from VV)
-          uncomRev: 1574,
-          // 34% chance for uncommon reverse slot over common, this one is a guess
-          sec: 42,
-          // 0.91% chance for secret
-          rain: 57,
-          // 1.23% chance for rainbow
-          ult: 173,
-          // 3.74% chance for ultra rare
-          vmax: 102,
-          // 2.20% chance for VMAX
-          v: 657 // 14.20% chance for V
+      case "sm1":
+        packArr = getPack("none", 0, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.81,
+          rain: 1.47,
+          ult: 4.22,
+          gx: 11.15
+        });
+        break;
 
+      case "sm2":
+        packArr = getPack("none", 0, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.81,
+          rain: 1.29,
+          ult: 3.59,
+          gx: 11.11
+        });
+        break;
+
+      case "sm3":
+        packArr = getPack("none", 0, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.95,
+          rain: 1.59,
+          ult: 3.93,
+          gx: 10.95
+        });
+        break;
+
+      case "sm4":
+        packArr = getPack("none", 0, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 1.11,
+          rain: 1.11,
+          ult: 4.44,
+          gx: 8.30
+        });
+        break;
+
+      case "sm5":
+        packArr = getPack("prism", 7.91, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.71,
+          rain: 1.34,
+          ult: 3.56,
+          gx: 7.44
+        });
+        break;
+
+      case "sm6":
+        packArr = getPack("prism", 7.91, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.71,
+          rain: 1.34,
+          ult: 3.56,
+          gx: 7.44
+        });
+        break;
+
+      case "sm7":
+        packArr = getPack("prism", 5.47, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.88,
+          rain: 1.22,
+          ult: 3.78,
+          gx: 10.34
+        });
+        break;
+
+      case "sm75":
+        packArr = getPack("prism", 10.8, {
+          revRare: 60,
+          holo: 100,
+          uncomRev: 34,
+          sec: 0.77,
+          rain: 2.31,
+          ult: 6.94,
+          gx: 15.42
+        });
+        break;
+
+      case "sm8":
+        packArr = getPack("prism", 12.17, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 1.02,
+          rain: 1.33,
+          ult: 4.4,
+          gx: 10.28
+        });
+        break;
+
+      case "sm9":
+        packArr = getPack("prism", 5.96, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.69,
+          rain: 1.03,
+          ult: 4.82,
+          gx: 9.29
+        });
+        break;
+
+      case "sm10":
+        packArr = getPack("none", 0, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.9,
+          rain: 1.39,
+          ult: 4.12,
+          gx: 9.88
+        });
+        break;
+
+      case "sm11":
+        packArr = getPack("none", 0, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.9,
+          rain: 1.44,
+          ult: 4.36,
+          gx: 12.72
+        });
+        break;
+
+      case "sm12":
+        packArr = getPack("sec-mon", 10.11, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.89,
+          rain: 1.5,
+          ult: 3.74,
+          gx: 11.93
+        });
+        break;
+
+      case "swsh1":
+        packArr = getPack("none", 0, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.91,
+          rain: 1.23,
+          ult: 3.74,
+          vmax: 2.2,
+          v: 14.2
         });
         break;
 
       case "swsh2":
-        // RC data from https://efour.proboards.com/thread/16380/pull-rates-modern-sets
-        packArr = getPack("none", 0, 2736, {
-          // no insert for rev slot, x/2736 for whole set
-          revRare: 1642,
-          // 60% chance for reverse slot rare (a guess based on VV data)
-          holo: 459,
-          // 16.76% chance for holo (a guess from VV)
-          uncomRev: 930,
-          // 34% chance for uncommon reverse slot over common, this one is a guess
-          sec: 26,
-          // 0.95% chance for secret
-          rain: 41,
-          // 1.50% chance for rainbow
-          ult: 103,
-          // 3.76% chance for ultra rare
-          vmax: 93,
-          // 3.40% chance for VMAX
-          v: 346 // 12.65% chance for V
-
+        packArr = getPack("none", 0, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.95,
+          rain: 1.5,
+          ult: 3.76,
+          vmax: 3.4,
+          v: 12.65
         });
         break;
 
       case "swsh3":
-        // DA data from https://efour.proboards.com/thread/16380/pull-rates-modern-sets
-        packArr = getPack("none", 0, 5040, {
-          // no insert for rev slot, x/5040 for whole set
-          revRare: 3024,
-          // 60% chance for reverse slot rare (a guess based on VV data)
-          holo: 845,
-          // 16.76% chance for holo (a guess from VV)
-          uncomRev: 1764,
-          // 34% chance for uncommon reverse slot over common, this one is a guess
-          sec: 44,
-          // 0.87% chance for secret
-          rain: 60,
-          // 1.19% chance for rainbow
-          ult: 194,
-          // 3.85% chance for ultra rare
-          vmax: 194,
-          // 3.85% chance for VMAX
-          v: 634 // 12.58% chance for V
-
+        packArr = getPack("none", 0, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0.87,
+          rain: 1.19,
+          ult: 3.85,
+          vmax: 3.85,
+          v: 12.58
         });
         break;
 
       case "swsh35":
         // champ's path data from https://cardzard.com/blogs/news/champions-path-pull-rate-data-2020
-        packArr = getPack("energy", 9, 1457, {
-          // 9% chance for amazing, x/1457 for whole set
-          revRare: 248,
-          // 17% chance for reverse slot rare (same as regular chances of non-holo rare)
-          holo: 1105,
-          // 75% chance for holo
-          uncomRev: 504,
-          // 34% chance for uncommon reverse slot over common, this one is a guess
-          sec: 19,
-          // 1.28% chance for secret
-          rain: 24,
-          // 1.65% chance for rainbow
-          ult: 61,
-          // 4.21% chance for ultra rare
-          vmax: 248,
-          // 17.03% chance for VMAX
-          v: 248 // 17.03% chance for V
-
-        }, true); // guarantee holo--a fallback
-
+        packArr = getPack("energy", 9.52, {
+          revRare: 17,
+          holo: 100,
+          uncomRev: 34,
+          sec: 1.28,
+          rain: 1.65,
+          ult: 4.21,
+          vmax: 17.03,
+          v: 17.03
+        });
         break;
 
       case "swsh4":
         // vivid voltage data from https://cardzard.com/blogs/news/vivid-voltage-pull-rate-data
-        packArr = getPack("amazing", 5, 2184, {
-          // 5% chance for amazing, x/2184 for whole set
-          revRare: 1313,
-          // 60% chance for reverse slot rare (same as regular chances of non-holo rare)
-          holo: 366,
-          // 16.76% chance for holo
-          uncomRev: 764,
-          // 35% chance for uncommon reverse slot over common, this one is a guess
-          sec: 23,
-          // 1.05% chance for golden
-          rain: 31,
-          // 1.42% chance for rainbow
-          ult: 89,
-          // 4.07% chance for ultra rare
-          vmax: 91,
-          // 4.17% chance for VMAX
-          v: 271 // 12.41 chance for V
-
+        packArr = getPack("amazing", 5.17, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 1.05,
+          rain: 1.42,
+          ult: 4.07,
+          vmax: 4.17,
+          v: 12.41
         });
         break;
     } // clear pack innerHTML and 
@@ -545,10 +736,9 @@ window.onload = function () {
             // to prevent this from being thrown on energy cards
             if (packArr[_i5].supertype != "Energy") noPrices = true; // tcgplayer price debugging
 
-            if (noPrices) {
-              console.log("Error on card: " + _i5);
-              console.log(packArr[_i5]);
-              console.log(err);
+            if (noPrices) {//console.log("Error on card: " + i);
+              //console.log(packArr[i]);
+              //console.log(err);
             }
 
             continue;
@@ -573,32 +763,4 @@ window.onload = function () {
       }
     };
   };
-};
-/*
-VARIABLES.JS
-
-Global variables and helper functions.
-*/
-
-/* MARK: - Other Variables - */
-
-
-var darkMode = false;
-var socket = io();
-/* MARK: - Helper Functions - */
-// random int
-
-var random = function random(min, max) {
-  return Math.floor(Math.random() * max) + min;
-}; // shuffle array
-// taken from https://javascript.info/task/shuffle
-
-
-var shuffle = function shuffle(arr) {
-  for (var i = arr.length - 1; i > 0; i--) {
-    var j = random(0, i);
-    var _ref = [arr[j], arr[i]];
-    arr[i] = _ref[0];
-    arr[j] = _ref[1];
-  }
 };
