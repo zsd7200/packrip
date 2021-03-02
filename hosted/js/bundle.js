@@ -615,14 +615,13 @@ window.onload = function () {
         div.classList.add("hidden");
         div.style.zIndex = 100 - _i2; // if last card in pack, remove loading and err message and add onclick to first child
 
-        if (_i2 == packArr.length - 1) img.onload = function () {
-          loading.classList.add("hidden");
-          errDisp.classList.add("hidden");
-
-          parent.childNodes[0].onclick = function () {
-            moveCard(0, parent);
+        if (_i2 == packArr.length - 1) {
+          img.onload = function () {
+            loading.classList.add("hidden");
+            errDisp.classList.add("hidden");
           };
-        };
+        }
+
         img.src = packArr[_i2].images.small;
         tilt1 = true; // do this for modern completed sets
 
@@ -633,14 +632,12 @@ window.onload = function () {
             if (holo && _i2 == packArr.length - 1 || _i2 == packArr.length - 2) div.classList.add("holo");
             break;
           }
-        } // the first child's onclick gets set later, once all the images have loaded
-        // this is done to prevent any weirdness by cycling through cards really fast 
-        // before all of the images have loaded
+        }
 
-
-        if (_i2 != 0) div.onclick = function () {
+        div.onclick = function () {
           moveCard(_i2, parent);
         };
+
         div.appendChild(img);
         parent.appendChild(div);
       };

@@ -580,12 +580,12 @@ window.onload = () => {
 				div.style.zIndex = 100 - i;
 				
 				// if last card in pack, remove loading and err message and add onclick to first child
-				if(i == packArr.length - 1)
+				if(i == packArr.length - 1) {
 					img.onload = () => { 
 						loading.classList.add("hidden"); 
-						errDisp.classList.add("hidden"); 
-						parent.childNodes[0].onclick = () => { moveCard(0, parent); };
+						errDisp.classList.add("hidden");
 					};
+				}
 				
 				img.src = packArr[i].images.small;
 				tilt1 = true;
@@ -603,12 +603,7 @@ window.onload = () => {
 						break;
 					}
 				
-				// the first child's onclick gets set later, once all the images have loaded
-				// this is done to prevent any weirdness by cycling through cards really fast 
-				// before all of the images have loaded
-				if(i != 0)
-					div.onclick = () => { moveCard(i, parent); };
-				
+				div.onclick = () => { moveCard(i, parent); };
 				div.appendChild(img);
 				parent.appendChild(div);
 			}
@@ -621,7 +616,7 @@ window.onload = () => {
 			}, 500);
 		};
 		
-		let moveCard = (cardIndex,parent) => {
+		let moveCard = (cardIndex, parent) => {
 			let p;
 			
 			// move the card over to the left by adding seen card class
@@ -656,7 +651,7 @@ window.onload = () => {
 				// swap tilt variable
 				tilt1 = !tilt1;
 				
-				parent.childNodes[cardIndex].onclick = () => { moveCard(cardIndex,parent); };
+				parent.childNodes[cardIndex].onclick = () => { moveCard(cardIndex, parent); };
 			};
 			
 			// get price of pack based on TCGPlayer market price
