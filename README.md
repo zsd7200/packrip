@@ -7,6 +7,7 @@ Currently completed sets:
 - Sun and Moon (sm1)
 - Guardians Rising (sm2)
 - Burning Shadows (sm3)
+- Shining Legends (sm35)
 - Crimson Invasion (sm4)
 - Ultra Prism (sm5)
 - Forbidden Light (sm6)
@@ -16,12 +17,14 @@ Currently completed sets:
 - Team Up (sm9)
 - Unbroken Bonds (sm10)
 - Unified Minds (sm11)
+- Hidden Fates (sm115)
 - Cosmic Eclipse (sm12)
 - Sword and Shield (swsh1)
 - Rebel Clash (swsh2)
 - Darkness Ablaze (swsh3)
 - Champion's Path (swsh35)
 - Vivid Voltage (swsh4)
+- Shining Fates (swsh45)
 
 Completed sets are listed with a "✓" in the dropdown menu and have their own booster pack art. Uncompleted sets will show a default pack art and generate 11 cards at random from that set.
 

@@ -50,14 +50,14 @@ window.onload = function () {
 
   var errCheck; // use this so only one setTimeout is going at a time in open()
 
-  var completedSets = ["sm1", "sm2", "sm3", "sm4", "sm5", "sm6", "sm7", "sm75", "sm8", "sm9", "sm10", "sm11", "sm12", "swsh1", "swsh2", "swsh3", "swsh35", "swsh4"];
+  var completedSets = ["sm1", "sm2", "sm3", "sm35", "sm4", "sm5", "sm6", "sm7", "sm75", "sm8", "sm9", "sm10", "sm11", "sm115", "sm12", "swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45"];
   var socket = io(); // get setIDs upon load
 
   socket.on('start', function (sets) {
     setData = JSON.parse(sets);
     setIDs = Object.keys(setData).filter(function (set) {
-      // filter out promos, mcdonalds sets, and POP series sets
-      if (setData[set].indexOf("Promo") > -1 || setData[set].indexOf("McDonald") > -1 || setData[set].indexOf("POP") > -1) return false;else return true;
+      // filter out promos, mcdonalds sets, POP series sets, and Shiny Vault sets since those are included within their bigger set
+      if (setData[set].indexOf("Promo") > -1 || setData[set].indexOf("McDonald") > -1 || setData[set].indexOf("POP") > -1 || setData[set].indexOf("Vault") > -1) return false;else return true;
     });
 
     for (var i = 0; i < setIDs.length; i++) {
@@ -72,6 +72,12 @@ window.onload = function () {
       }
 
       setDropdown.add(option);
+    } // check if data needs to be cleared
+
+
+    if (!localStorage.getItem(lsKey + "cleared")) {
+      localStorage.clear();
+      localStorage.setItem(lsKey + "cleared", true);
     } // enable items and restore last selection (if applicable)
 
 
@@ -85,8 +91,11 @@ window.onload = function () {
       errDisp.innerHTML += "Could not get data from server!<br>";
       errDisp.innerHTML += "Please refresh the page.";
       errDisp.classList.remove("hidden");
-    }
+    } // get shiny vault data for hidden/shining fates
 
+
+    if (!localStorage.getItem(lsKey + "sma")) socket.emit('get-set', "sma");
+    if (!localStorage.getItem(lsKey + "swsh45sv")) socket.emit('get-set', "swsh45sv");
     loading.classList.add("hidden"); // emit this to stores energies from sun and moon base set from server
 
     if (smEnergies.length == 0) socket.emit('get-energies');
@@ -105,8 +114,10 @@ window.onload = function () {
     } // only emit if it is not in localstorage, otherwise pull from localstorage
 
 
-    if (!localStorage.getItem(lsKey + currSetID)) {
-      socket.emit('get-set', currSetID);
+    if (!localStorage.getItem(lsKey + currSetID) || currSetID == "sm115" && !localStorage.getItem(lsKey + "sma") || currSetID == "swsh45" && !localStorage.getItem(lsKey + "swsh45sv")) {
+      socket.emit('get-set', currSetID); // also get shiny vault if hidden/shining fates
+
+      if (currSetID == "sm115") socket.emit('get-set', "sma");else if (currSetID == "swsh45") socket.emit('get-set', "swsh45sv");
       loading.classList.remove("hidden");
     } else {
       currSet = JSON.parse(localStorage.getItem(lsKey + currSetID));
@@ -126,24 +137,29 @@ window.onload = function () {
   }); // hide loading icon and set localstorage data
 
   socket.on('get-set', function (data, setID) {
-    loading.classList.add("hidden"); // try to store new set data in localStorage
-
+    // try to store new set data in localStorage
     try {
       localStorage.setItem(lsKey + setID, JSON.stringify(data));
     } catch (err) {
       // store data to put back into localStorage
-      var selection, energy;
+      var selection, energy, hiddenFates, shiningFates;
       selection = localStorage.getItem(lsKey + "selection");
-      energy = localStorage.getItem(lsKey + "smEnergy"); // clear localstorage and restore some old data
+      energy = localStorage.getItem(lsKey + "smEnergy");
+      hiddenVault = localStorage.getItem(lsKey + "sma");
+      shiningVault = localStorage.getItem(lsKey + "swsh45sv"); // clear localstorage and restore some old data
 
       localStorage.clear();
+      localStorage.setItem(lsKey + "cleared", true);
       localStorage.setItem(lsKey + "selection", selection);
       localStorage.setItem(lsKey + "smEnergy", energy);
+      localStorage.setItem(lsKey + "sma", hiddenVault);
+      localStorage.setItem(lsKey + "swsh45sv", shiningVault);
       localStorage.setItem(lsKey + setID, JSON.stringify(data));
     }
 
     currSet = data;
-    showCards();
+    if (setID != "sma" && setID != "swsh45sv") showCards();
+    loading.classList.add("hidden");
   }); // send error to console
 
   socket.on('error', function (err) {
@@ -161,42 +177,110 @@ window.onload = function () {
 
     var boosterArt = ""; // divide current set by rarities
 
-    var currSetComm = currSet.filter(function (card) {
+    var currSetJson = {};
+    currSetJson.comm = currSet.filter(function (card) {
       return card.rarity == "Common";
     });
-    var currSetUncomm = currSet.filter(function (card) {
+    currSetJson.uncomm = currSet.filter(function (card) {
       return card.rarity == "Uncommon";
     });
-    var currSetRare = currSet.filter(function (card) {
+    currSetJson.rare = currSet.filter(function (card) {
       return card.rarity == "Rare";
     });
-    var currSetHolo = currSet.filter(function (card) {
+    currSetJson.holo = currSet.filter(function (card) {
       return card.rarity == "Rare Holo";
     });
-    var currSetV = currSet.filter(function (card) {
-      return card.rarity == "Rare Holo V";
-    });
-    var currSetVMax = currSet.filter(function (card) {
-      return card.rarity == "Rare Holo VMAX";
-    });
-    var currSetUlt = currSet.filter(function (card) {
-      return card.rarity == "Rare Ultra";
-    });
-    var currSetRain = currSet.filter(function (card) {
-      return card.rarity == "Rare Rainbow";
-    });
-    var currSetSec = currSet.filter(function (card) {
-      return card.rarity == "Rare Secret";
-    });
-    var currSetAmaz = currSet.filter(function (card) {
-      return card.rarity == "Amazing Rare";
-    });
-    var currSetGX = currSet.filter(function (card) {
+    currSetJson.gx = currSet.filter(function (card) {
       return card.rarity == "Rare Holo GX";
     });
-    var currSetPrism = currSet.filter(function (card) {
+    currSetJson.prism = currSet.filter(function (card) {
       return card.rarity == "Rare Prism Star";
-    }); // check for duplicate cards
+    });
+    currSetJson.v = currSet.filter(function (card) {
+      return card.rarity == "Rare Holo V";
+    });
+    currSetJson.vmax = currSet.filter(function (card) {
+      return card.rarity == "Rare Holo VMAX";
+    });
+    currSetJson.ult = currSet.filter(function (card) {
+      return card.rarity == "Rare Ultra";
+    });
+    currSetJson.rain = currSet.filter(function (card) {
+      return card.rarity == "Rare Rainbow";
+    });
+    currSetJson.sec = currSet.filter(function (card) {
+      return card.rarity == "Rare Secret";
+    });
+    currSetJson.amaz = currSet.filter(function (card) {
+      return card.rarity == "Amazing Rare";
+    }); // if shining legends, add shining cards to currSetJson
+
+    if (currSetID == "sm35") currSetJson.shining = currSet.filter(function (card) {
+      return card.rarity == "Rare Shining";
+    }); // subset to hold multiple reverse slot inserts
+
+    var subset = {};
+
+    if (currSetID == "sm115") {
+      var tempSet = JSON.parse(localStorage.getItem(lsKey + "sma"));
+
+      try {
+        subset.baby = tempSet.filter(function (card) {
+          return card.rarity == "Rare Shiny";
+        });
+        subset.gx = tempSet.filter(function (card) {
+          return card.rarity == "Rare Holo GX";
+        });
+        subset.trainer = tempSet.filter(function (card) {
+          return card.rarity == "Rare Ultra";
+        });
+        subset.golden = tempSet.filter(function (card) {
+          return card.rarity == "Rare Secret";
+        });
+      } catch (err) {
+        errDisp.innerHTML = "<p class=\"header\">ERROR:</p>";
+        errDisp.innerHTML += "Something went wrong!<br>";
+        errDisp.innerHTML += "Your pack might not be accurate this time, ";
+        errDisp.innerHTML += "but if you try again in a minute, it will likely ";
+        errDisp.innerHTML += "be way better.";
+        errDisp.classList.remove("hidden"); // fill will commons so it'll still show a pack
+
+        subset.baby = currSetJson.comm;
+        subset.gx = currSetJson.comm;
+        subset.trainer = currSetJson.comm;
+        subset.golden = currSetJson.comm;
+      }
+    } else if (currSetID == "swsh45") {
+      var _tempSet = JSON.parse(localStorage.getItem(lsKey + "swsh45sv"));
+
+      try {
+        subset.baby = _tempSet.filter(function (card) {
+          return card.rarity == "Rare Shiny";
+        });
+        subset.v = _tempSet.filter(function (card) {
+          return card.rarity == "Rare Holo V";
+        });
+        subset.vmax = _tempSet.filter(function (card) {
+          return card.rarity == "Rare Holo VMAX";
+        });
+        subset.golden = _tempSet.filter(function (card) {
+          return card.rarity == "Rare Secret";
+        });
+      } catch (err) {
+        errDisp.innerHTML = "<p class=\"header\">ERROR:</p>";
+        errDisp.innerHTML += "Something went wrong!<br>";
+        errDisp.innerHTML += "Your pack might not be accurate this time, ";
+        errDisp.innerHTML += "but if you try again in a minute, it will likely ";
+        errDisp.innerHTML += "be way better.";
+        errDisp.classList.remove("hidden"); // fill will commons so it'll still show a pack
+
+        subset.baby = currSetJson.comm;
+        subset.v = currSetJson.comm;
+        subset.vmax = currSetJson.comm;
+        subset.golden = currSetJson.comm;
+      }
+    } // check for duplicate cards
+
 
     var dupeCheck = function dupeCheck(currPack, set) {
       var dupe, rand; // loops until dupe is false
@@ -243,41 +327,56 @@ window.onload = function () {
 
     var getPack = function getPack() {
       var reverse = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "none";
-      var revPerc = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
+      var rev = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       var rareOdds = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var useSmEnergies = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
       var retArr = [];
       var comm = randomInt(0, 5) + 4;
       var uncom = 8 - comm;
-      var prism = reverse == "prism" && randomFixed(0, 100) < revPerc ? true : false;
-      var secMon = reverse == "sec-mon" && randomFixed(0, 100) < revPerc ? true : false;
-      var energy = reverse == "energy" && randomFixed(0, 100) < revPerc ? true : false;
-      var amazing = reverse == "amazing" && randomFixed(0, 100) < revPerc ? true : false; // fill up common and uncommon slots
+      var prism = reverse == "prism" && randomFixed(0, 100) < rev.perc ? true : false;
+      var secMon = reverse == "sec-mon" && randomFixed(0, 100) < rev.perc ? true : false;
+      var energy = reverse == "energy" && randomFixed(0, 100) < rev.perc ? true : false;
+      var amazing = reverse == "amazing" && randomFixed(0, 100) < rev.perc ? true : false;
+      var multiple = reverse == "multiple" ? true : false; // fill up common and uncommon slots
 
       for (var i = 0; i < comm; i++) {
-        retArr.push(dupeCheck(retArr, currSetComm));
+        retArr.push(dupeCheck(retArr, currSetJson.comm));
       }
 
       for (var _i = 0; _i < uncom; _i++) {
-        retArr.push(dupeCheck(retArr, currSetUncomm));
+        retArr.push(dupeCheck(retArr, currSetJson.uncomm));
       } // shuffle array order
 
 
       shuffle(retArr); // reverse slot
 
-      if (prism) retArr.push(randCard(currSetPrism));else if (secMon) retArr.push(getSpecificSec("Pokémon", currSetSec));else if (energy && useSmEnergies) retArr.push(randCard(smEnergies));else if (amazing) retArr.push(randCard(currSetAmaz));else if (randomFixed(0, 100) < rareOdds.revRare) {
-        if (randomFixed(0, 100) < rareOdds.holo) retArr.push(randCard(currSetHolo));else retArr.push(randCard(currSetRare));
-      } else if (randomFixed(0, 100) < rareOdds.uncomRev) retArr.push(randCard(currSetUncomm));else retArr.push(randCard(currSetComm)); // rare slot
+      if (multiple) {
+        if (currSetID == "sm115") {
+          // hidden fates
+          if (randomFixed(0, 100) < rev.golden) retArr.push(randCard(subset.golden));else if (randomFixed(0, 100) < rev.trainer) retArr.push(randCard(subset.trainer));else if (randomFixed(0, 100) < rev.gx) retArr.push(randCard(subset.gx));else if (randomFixed(0, 100) < rev.baby) retArr.push(randCard(subset.baby));
+        } else if (currSetID == "swsh45") {
+          // shining fates
+          if (randomFixed(0, 100) < rev.golden) retArr.push(randCard(subset.golden));else if (randomFixed(0, 100) < rev.vmax) retArr.push(randCard(subset.vmax));else if (randomFixed(0, 100) < rev.amazing) retArr.push(randCard(currSetJson.amaz));else if (randomFixed(0, 100) < rev.v) retArr.push(randCard(subset.v));else if (randomFixed(0, 100) < rev.baby) retArr.push(randCard(subset.baby));
+        }
+      } else if (prism) retArr.push(randCard(currSetJson.prism));else if (secMon) retArr.push(getSpecificSec("Pokémon", currSetJson.sec));else if (energy && useSmEnergies) retArr.push(randCard(smEnergies));else if (amazing) retArr.push(randCard(currSetJson.amaz)); // if insert card hasn't been picked, do this instead
 
-      if (randomFixed(0, 100) < rareOdds.sec) retArr.push(randCard(currSetSec));else if (randomFixed(0, 100) < rareOdds.rain) retArr.push(randCard(currSetRain));else if (randomFixed(0, 100) < rareOdds.ult) retArr.push(randCard(currSetUlt));else if (rareOdds.vmax) {
-        if (randomFixed(0, 100) < rareOdds.vmax) retArr.push(randCard(currSetVMax));else if (randomFixed(0, 100) < rareOdds.v) retArr.push(randCard(currSetV));
+
+      if (retArr.length != 9) {
+        if (randomFixed(0, 100) < rareOdds.revRare) {
+          if (randomFixed(0, 100) < rareOdds.holo) retArr.push(randCard(currSetJson.holo));else retArr.push(randCard(currSetJson.rare));
+        } else if (randomFixed(0, 100) < rareOdds.uncomRev) retArr.push(randCard(currSetJson.uncomm));else retArr.push(randCard(currSetJson.comm));
+      } // rare slot
+
+
+      if (randomFixed(0, 100) < rareOdds.sec) retArr.push(randCard(currSetJson.sec));else if (randomFixed(0, 100) < rareOdds.rain) retArr.push(randCard(currSetJson.rain));else if (randomFixed(0, 100) < rareOdds.ult) retArr.push(randCard(currSetJson.ult));else if (rareOdds.vmax) {
+        if (randomFixed(0, 100) < rareOdds.vmax) retArr.push(randCard(currSetJson.vmax));else if (randomFixed(0, 100) < rareOdds.v) retArr.push(randCard(currSetJson.v));
       } else if (rareOdds.gx) {
-        if (randomFixed(0, 100) < rareOdds.gx) retArr.push(randCard(currSetGX));
+        if (randomFixed(0, 100) < rareOdds.shining) retArr.push(randCard(currSetJson.shining));else if (randomFixed(0, 100) < rareOdds.gx) retArr.push(randCard(currSetJson.gx));
       } // if rare hasn't been selected, go to these conditions
 
       if (retArr.length == 9) {
-        if (randomFixed(0, 100) < rareOdds.holo) retArr.push(randCard(currSetHolo));else {
-          retArr.push(randCard(currSetRare));
+        if (randomFixed(0, 100) < rareOdds.holo) retArr.push(randCard(currSetJson.holo));else {
+          retArr.push(randCard(currSetJson.rare));
           holo = false;
         }
       }
@@ -306,6 +405,8 @@ window.onload = function () {
     }; // most modern set pull rate data taken from here:
     // https://efour.proboards.com/thread/16380/pull-rates-modern-sets
     // if not from there, it will be specified
+    // revRare, holo, and uncommon rare are guesses based on VV pull 
+    // rates unless otherwise stated
 
 
     switch (currSetID) {
@@ -317,7 +418,9 @@ window.onload = function () {
         break;
 
       case "sm1":
-        packArr = getPack("none", 0, {
+        packArr = getPack("none", {
+          perc: 0
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -329,7 +432,9 @@ window.onload = function () {
         break;
 
       case "sm2":
-        packArr = getPack("none", 0, {
+        packArr = getPack("none", {
+          perc: 0
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -341,7 +446,9 @@ window.onload = function () {
         break;
 
       case "sm3":
-        packArr = getPack("none", 0, {
+        packArr = getPack("none", {
+          perc: 0
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -352,8 +459,26 @@ window.onload = function () {
         });
         break;
 
+      case "sm35":
+        packArr = getPack("energy", {
+          perc: 9.52
+        }, {
+          // energy insert percent is a guess based on champ's path below
+          revRare: 60,
+          holo: 100,
+          uncomRev: 34,
+          sec: 0.91,
+          rain: 1.50,
+          ult: 3.97,
+          gx: 11.85,
+          shining: 8.72
+        });
+        break;
+
       case "sm4":
-        packArr = getPack("none", 0, {
+        packArr = getPack("none", {
+          perc: 0
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -365,7 +490,9 @@ window.onload = function () {
         break;
 
       case "sm5":
-        packArr = getPack("prism", 7.91, {
+        packArr = getPack("prism", {
+          perc: 7.91
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -377,7 +504,9 @@ window.onload = function () {
         break;
 
       case "sm6":
-        packArr = getPack("prism", 7.91, {
+        packArr = getPack("prism", {
+          perc: 7.91
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -389,7 +518,9 @@ window.onload = function () {
         break;
 
       case "sm7":
-        packArr = getPack("prism", 5.47, {
+        packArr = getPack("prism", {
+          perc: 5.47
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -401,7 +532,9 @@ window.onload = function () {
         break;
 
       case "sm75":
-        packArr = getPack("prism", 10.8, {
+        packArr = getPack("prism", {
+          perc: 10.8
+        }, {
           revRare: 60,
           holo: 100,
           uncomRev: 34,
@@ -413,7 +546,9 @@ window.onload = function () {
         break;
 
       case "sm8":
-        packArr = getPack("prism", 12.17, {
+        packArr = getPack("prism", {
+          perc: 12.17
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -425,7 +560,9 @@ window.onload = function () {
         break;
 
       case "sm9":
-        packArr = getPack("prism", 5.96, {
+        packArr = getPack("prism", {
+          perc: 5.96
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -437,7 +574,9 @@ window.onload = function () {
         break;
 
       case "sm10":
-        packArr = getPack("none", 0, {
+        packArr = getPack("none", {
+          perc: 0
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -449,7 +588,9 @@ window.onload = function () {
         break;
 
       case "sm11":
-        packArr = getPack("none", 0, {
+        packArr = getPack("none", {
+          perc: 0
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -460,8 +601,28 @@ window.onload = function () {
         });
         break;
 
+      case "sm115":
+        packArr = getPack("multiple", {
+          golden: 1.77,
+          trainer: 3.42,
+          gx: 10.19,
+          baby: 21.2
+        }, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 0,
+          // secrets are handled in reverse slot
+          rain: 1.71,
+          ult: 4.87,
+          gx: 15.06
+        });
+        break;
+
       case "sm12":
-        packArr = getPack("sec-mon", 10.11, {
+        packArr = getPack("sec-mon", {
+          perc: 10.11
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -473,7 +634,9 @@ window.onload = function () {
         break;
 
       case "swsh1":
-        packArr = getPack("none", 0, {
+        packArr = getPack("none", {
+          perc: 0
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -486,7 +649,9 @@ window.onload = function () {
         break;
 
       case "swsh2":
-        packArr = getPack("none", 0, {
+        packArr = getPack("none", {
+          perc: 0
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -499,7 +664,9 @@ window.onload = function () {
         break;
 
       case "swsh3":
-        packArr = getPack("none", 0, {
+        packArr = getPack("none", {
+          perc: 0
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -513,7 +680,9 @@ window.onload = function () {
 
       case "swsh35":
         // champ's path data from https://cardzard.com/blogs/news/champions-path-pull-rate-data-2020
-        packArr = getPack("energy", 9.52, {
+        packArr = getPack("energy", {
+          perc: 9.52
+        }, {
           revRare: 17,
           holo: 100,
           uncomRev: 34,
@@ -527,7 +696,9 @@ window.onload = function () {
 
       case "swsh4":
         // vivid voltage data from https://cardzard.com/blogs/news/vivid-voltage-pull-rate-data
-        packArr = getPack("amazing", 5.17, {
+        packArr = getPack("amazing", {
+          perc: 5.17
+        }, {
           revRare: 60,
           holo: 16.76,
           uncomRev: 34,
@@ -536,6 +707,27 @@ window.onload = function () {
           ult: 4.07,
           vmax: 4.17,
           v: 12.41
+        });
+        break;
+
+      case "swsh45":
+        // shining fates data from https://cardzard.com/blogs/news/shining-fates-pull-rate-data-2021 and https://old.reddit.com/r/PokemonTCG/comments/ln53pr/compiling_shining_fates_pull_data_and_results/
+        packArr = getPack("multiple", {
+          golden: 0.64,
+          vmax: 2.58,
+          amazing: 5.24,
+          v: 7.27,
+          baby: 23.18
+        }, {
+          revRare: 58.57,
+          holo: 17.53,
+          uncomRev: 34,
+          sec: 0,
+          // secrets are handled in reverse slot
+          rain: 1.79,
+          ult: 4.58,
+          vmax: 5.34,
+          v: 11.04
         });
         break;
     } // clear pack innerHTML and 
