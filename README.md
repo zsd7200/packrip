@@ -15,6 +15,7 @@ Currently completed sets:
 - Dragon Majesty (sm75)
 - Lost Thunder (sm8)
 - Team Up (sm9)
+- Detective Pikachu (det1)
 - Unbroken Bonds (sm10)
 - Unified Minds (sm11)
 - Hidden Fates (sm115)

@@ -21,9 +21,8 @@ window.onload = () => {
 	let errCheck;		   			// use this so only one setTimeout is going at a time in open()
 	let completedSets = [
 		"sm1", "sm2", "sm3", "sm35", "sm4", "sm5", "sm6", "sm7",
-		"sm75", "sm8", "sm9", "sm10", "sm11", "sm115", "sm12",
-		"swsh1", "swsh2", "swsh3", "swsh35", "swsh4",
-		"swsh45",
+		"sm75", "sm8", "sm9", "det1", "sm10", "sm11", "sm115", "sm12",
+		"swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45",
 	];
 	let socket = io();
 	
@@ -408,6 +407,28 @@ window.onload = () => {
 			return retArr;
 		};
 
+		// custom func for detective pikachu packs since they're weird 4 card packs
+		let detectivePack = () => {
+			// 4 cards
+			// only commons, rares, and URs
+			const comm = 3;
+			const URperc = 37.08;
+			let retArr = [];
+			
+			// fill commons
+			for(let i = 0; i < comm; i++)
+				retArr.push(dupeCheck(retArr, currSetJson.comm));
+			
+			// "ultra rare" in this set just means holographic star symbol
+			// for rarity--no spectacular art or anything
+			if(randomFixed(0, 100) < URperc)
+				retArr.push(randCard(currSetJson.ult));
+			else
+				retArr.push(randCard(currSetJson.rare));
+			
+			return retArr;
+		};
+
 		// most modern set pull rate data taken from here:
 		// https://efour.proboards.com/thread/16380/pull-rates-modern-sets
 		// if not from there, it will be specified
@@ -539,6 +560,9 @@ window.onload = () => {
 					ult : 4.82,
 					gx : 9.29, 
 				});
+				break;
+			case "det1":
+				packArr = detectivePack();	// custom func because weird set
 				break;
 			case "sm10":								
 				packArr = getPack("none", { perc : 0 }, {		  
@@ -753,11 +777,15 @@ window.onload = () => {
 							img.classList.add("sm-energy");
 						
 						// add holo class to reverse and end holo
-						if(holo && i == (packArr.length - 1) || i == (packArr.length - 2))
+						if(currSetID != "det1" && (holo && i == (packArr.length - 1) || i == (packArr.length - 2)))
 							div.classList.add("holo");
 						
 						break;
 					}
+				
+				// every card in detective pikachu is a holo
+				if(currSetID == "det1")
+					div.classList.add("holo");
 				
 				div.onclick = () => { moveCard(i, parent); };
 				div.appendChild(img);
