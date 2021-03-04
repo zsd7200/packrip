@@ -127,7 +127,7 @@ h1 {
 .seen-card {
   position: absolute;
   animation: none;
-  left: 10px;
+  left: 25%;
   cursor: pointer; }
 
 /* Shine effect modified from: https://codepen.io/paigen11/pen/VwKZGMp */
@@ -235,3 +235,10 @@ h1 {
   transition: .5s; }
 
 /* MARK: - Media Queries for different screen sizes - */
+@media only screen and (max-width: 760px) {
+  .seen-card {
+    left: 10px; } }
+
+@media only screen and (max-width: 800px) {
+  .seen-card {
+    left: 10px; } }
