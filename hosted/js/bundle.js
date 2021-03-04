@@ -706,7 +706,7 @@ window.onload = function () {
         packArr = getPack("energy", {
           perc: 9.52
         }, {
-          revRare: 17,
+          revRare: 17.03,
           holo: 100,
           uncomRev: 34,
           sec: 1.28,

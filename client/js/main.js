@@ -651,7 +651,7 @@ window.onload = () => {
 				break;
 			case "swsh35":	// champ's path data from https://cardzard.com/blogs/news/champions-path-pull-rate-data-2020
 				packArr = getPack("energy", { perc : 9.52 }, {	 
-					revRare : 17,  
+					revRare : 17.03,  
 					holo : 100,
 					uncomRev : 34, 
 					sec : 1.28,
@@ -681,8 +681,8 @@ window.onload = () => {
 					v : 7.27,
 					baby : 23.18,
 					}, {	
-						revRare : 58.57,  
-						holo : 17.53,  
+						revRare : 58.57,
+						holo : 17.53,
 						uncomRev : 34, 
 						sec : 0,		// secrets are handled in reverse slot
 						rain : 1.79,
