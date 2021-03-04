@@ -148,6 +148,14 @@ h1 { text-align: center; }
     cursor: pointer;
 }
 
+/* Disable double-click selection on cards and pack art */
+.card, .seen-card, .booster-art {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 /* Shine effect modified from: https://codepen.io/paigen11/pen/VwKZGMp */
 .holo {
     position: absolute;
