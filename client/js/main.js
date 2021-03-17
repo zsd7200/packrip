@@ -22,7 +22,7 @@ window.onload = () => {
 	let completedSets = [
 		"sm1", "sm2", "sm3", "sm35", "sm4", "sm5", "sm6", "sm7",
 		"sm75", "sm8", "sm9", "det1", "sm10", "sm11", "sm115", "sm12",
-		"swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45",
+		"swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45", "swsh5", 
 	];
 	let socket = io();
 	
@@ -602,7 +602,7 @@ window.onload = () => {
 						gx : 15.06
 					});
 				break;
-			case "sm12":								
+			case "sm12":
 				packArr = getPack("sec-mon", { perc : 10.11 }, {   
 					revRare : 60,  
 					holo : 16.76,  
@@ -613,7 +613,7 @@ window.onload = () => {
 					gx : 11.93,
 				});
 				break;
-			case "swsh1":							   
+			case "swsh1":
 				packArr = getPack("none", { perc : 0 }, {		  
 					revRare : 60,  
 					holo : 16.76,  
@@ -625,7 +625,7 @@ window.onload = () => {
 					v : 14.2,  
 				});
 				break;
-			case "swsh2":							   
+			case "swsh2":
 				packArr = getPack("none", { perc : 0 }, {		  
 					revRare : 60,  
 					holo : 16.76,  
@@ -637,7 +637,7 @@ window.onload = () => {
 					v : 12.65, 
 				});
 				break;
-			case "swsh3":							   
+			case "swsh3":
 				packArr = getPack("none", { perc : 0 }, {		  
 					revRare : 60,  
 					holo : 16.76,  
@@ -690,6 +690,18 @@ window.onload = () => {
 						vmax : 5.34,
 						v : 11.04, 
 					});
+				break;
+			case "swsh5":	// battle styles data from https://cardzard.com/blogs/news/battle-styles-pull-rate-data
+				packArr = getPack("none", { perc : 0 }, {		  
+					revRare : 60,  
+					holo : 16.76,  
+					uncomRev : 34, 
+					sec : 1,		// this assumes pokemon tcg api will use secret rare designation for alt art vmax and golden cards
+					rain : 0.93,
+					ult : 3.13,
+					vmax : 4.34,
+					v : 12.1, 
+				});
 				break;
 		}
 			

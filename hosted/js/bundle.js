@@ -50,7 +50,7 @@ window.onload = function () {
 
   var errCheck; // use this so only one setTimeout is going at a time in open()
 
-  var completedSets = ["sm1", "sm2", "sm3", "sm35", "sm4", "sm5", "sm6", "sm7", "sm75", "sm8", "sm9", "det1", "sm10", "sm11", "sm115", "sm12", "swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45"];
+  var completedSets = ["sm1", "sm2", "sm3", "sm35", "sm4", "sm5", "sm6", "sm7", "sm75", "sm8", "sm9", "det1", "sm10", "sm11", "sm115", "sm12", "swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45", "swsh5"];
   var socket = io(); // get setIDs upon load
 
   socket.on('start', function (sets) {
@@ -751,6 +751,23 @@ window.onload = function () {
           ult: 4.58,
           vmax: 5.34,
           v: 11.04
+        });
+        break;
+
+      case "swsh5":
+        // battle styles data from https://cardzard.com/blogs/news/battle-styles-pull-rate-data
+        packArr = getPack("none", {
+          perc: 0
+        }, {
+          revRare: 60,
+          holo: 16.76,
+          uncomRev: 34,
+          sec: 1,
+          // this assumes pokemon tcg api will use secret rare designation for alt art vmax and golden cards
+          rain: 0.93,
+          ult: 3.13,
+          vmax: 4.34,
+          v: 12.1
         });
         break;
     } // clear pack innerHTML and 
