@@ -3,5 +3,11 @@
   "rules": {
     "no-underscore-dangle" : "off",
     "no-plusplus": "off",
+    "import/extensions": [
+        "error",
+        {
+            "js": "ignorePackages"
+        }
+    ]
   }
 }
