@@ -23,6 +23,7 @@ window.onload = () => {
 		"sm1", "sm2", "sm3", "sm35", "sm4", "sm5", "sm6", "sm7",
 		"sm75", "sm8", "sm9", "det1", "sm10", "sm11", "sm115", "sm12",
 		"swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45", "swsh5", 
+		"swsh6",
 	];
 	let socket = io();
 	
@@ -696,11 +697,23 @@ window.onload = () => {
 					revRare : 60,  
 					holo : 16.76,  
 					uncomRev : 34, 
-					sec : 1,		// this assumes pokemon tcg api will use secret rare designation for alt art vmax and golden cards
+					sec : 1,	// golden cards + alt art VMAX
 					rain : 0.93,
-					ult : 3.13,
+					ult : 3.13,	// fart v + fart trainer
 					vmax : 4.34,
 					v : 12.1, 
+				});
+				break;
+			case "swsh6":	// chilling reign data from https://cardzard.com/blogs/news/chilling-reign-pull-rate-data-2021
+				packArr = getPack("none", { perc : 0 }, {		  
+					revRare : 60,  
+					holo : 13.2,  
+					uncomRev : 34, 
+					sec : 1.22,	// golden + alt art vmax
+					rain : 0.82,
+					ult : 3.32, // fart v + fart trainer
+					vmax : 4.18,
+					v : 12.1, 	// data not provided, so will remain the same from previous set
 				});
 				break;
 		}

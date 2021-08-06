@@ -26,11 +26,10 @@ Currently completed sets:
 - Champion's Path (swsh35)
 - Vivid Voltage (swsh4)
 - Shining Fates (swsh45)
-- Battle Styles (swsh5)\*
+- Battle Styles (swsh5)
+- Chilling Reign (swsh6)
 
 Completed sets are listed with a "✓" in the dropdown menu and have their own booster pack art. Uncompleted sets will show a default pack art and generate 11 cards at random from that set.
-
-\* - Battle Styles pull data has been entered, but the Pokémon TCG API has not been updated to include Battle Styles as of 3/17/21. This asterisk will be removed once the API is updated and Battle Styles is tested to be accurate. 
 
 ## Install
 To install and run the server locally run these commands:
