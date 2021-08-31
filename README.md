@@ -28,8 +28,11 @@ Currently completed sets:
 - Shining Fates (swsh45)
 - Battle Styles (swsh5)
 - Chilling Reign (swsh6)
+- Evolving Skies (swsh7)\*
 
 Completed sets are listed with a "✓" in the dropdown menu and have their own booster pack art. Uncompleted sets will show a default pack art and generate 11 cards at random from that set.
+
+\* - Evolving Skies is currently awaiting more data to accurately represent V and Holo Rare pulls, but should otherwise be accurate.
 
 ## Install
 To install and run the server locally run these commands:

@@ -50,7 +50,7 @@ window.onload = function () {
 
   var errCheck; // use this so only one setTimeout is going at a time in open()
 
-  var completedSets = ["sm1", "sm2", "sm3", "sm35", "sm4", "sm5", "sm6", "sm7", "sm75", "sm8", "sm9", "det1", "sm10", "sm11", "sm115", "sm12", "swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45", "swsh5", "swsh6"];
+  var completedSets = ["sm1", "sm2", "sm3", "sm35", "sm4", "sm5", "sm6", "sm7", "sm75", "sm8", "sm9", "det1", "sm10", "sm11", "sm115", "sm12", "swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45", "swsh5", "swsh6", "swsh7"];
   var socket = io(); // get setIDs upon load
 
   socket.on('start', function (sets) {
@@ -786,6 +786,26 @@ window.onload = function () {
           ult: 3.32,
           // fart v + fart trainer
           vmax: 4.18,
+          v: 12.1 // data not provided, so will remain the same from previous set
+
+        });
+        break;
+
+      case "swsh7":
+        // evolving skies data from https://www.reddit.com/r/PokemonTCG/comments/pf5scn/evolving_skies_pull_rate_data_from_5000_packs/
+        packArr = getPack("none", {
+          perc: 0
+        }, {
+          revRare: 60,
+          holo: 13.2,
+          // not provided, will remain saim
+          uncomRev: 34,
+          sec: 1.36,
+          // golden + alt art vmax
+          rain: 1.22,
+          ult: 2.29,
+          // fart v + fart trainer
+          vmax: 5.55,
           v: 12.1 // data not provided, so will remain the same from previous set
 
         });
