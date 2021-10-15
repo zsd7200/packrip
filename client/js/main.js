@@ -23,7 +23,7 @@ window.onload = () => {
 		"sm1", "sm2", "sm3", "sm35", "sm4", "sm5", "sm6", "sm7",
 		"sm75", "sm8", "sm9", "det1", "sm10", "sm11", "sm115", "sm12",
 		"swsh1", "swsh2", "swsh3", "swsh35", "swsh4", "swsh45", "swsh5", 
-		"swsh6", "swsh7",
+		"swsh6", "swsh7", "cel25",
 	];
 	let socket = io();
 	
@@ -32,7 +32,11 @@ window.onload = () => {
 		setData = JSON.parse(sets);
 		setIDs = Object.keys(setData).filter((set) => {
 			// filter out promos, mcdonalds sets, POP series sets, and Shiny Vault sets since those are included within their bigger set
-			if(setData[set].indexOf("Promo") > -1 || setData[set].indexOf("McDonald") > -1 || setData[set].indexOf("POP") > -1 || setData[set].indexOf("Vault") > -1)
+			if(setData[set].indexOf("Promo") > -1 || 
+			   setData[set].indexOf("McDonald") > -1 || 
+			   setData[set].indexOf("POP") > -1 || 
+			   setData[set].indexOf("Vault") > -1 || 
+			   setData[set].indexOf("Classic") > -1)
 				return false;
 			else
 				return true;
@@ -73,11 +77,13 @@ window.onload = () => {
 			errDisp.classList.remove("hidden");
 		}
 		
-		// get shiny vault data for hidden/shining fates
+		// get shiny vault data for hidden/shining fates and classic colleciton data for celebrations
 		if(!localStorage.getItem(lsKey + "sma"))
 			socket.emit('get-set', "sma");
 		if(!localStorage.getItem(lsKey + "swsh45sv"))
 			socket.emit('get-set', "swsh45sv");
+		if(!localStorage.getItem(lsKey + "cel25c"))
+			socket.emit('get-set', "cel25c");
 		
 		loading.classList.add("hidden");
 		
@@ -197,7 +203,7 @@ window.onload = () => {
 		
 		// subset to hold multiple reverse slot inserts
 		let subset = {};
-		if(currSetID == "sm115") {
+		if(currSetID == "sm115") {	// hidden fates
 			let tempSet = JSON.parse(localStorage.getItem(lsKey + "sma"));
 			try {
 				subset.baby = tempSet.filter((card) => { return card.rarity == "Rare Shiny"; });
@@ -218,7 +224,7 @@ window.onload = () => {
 				subset.trainer = currSetJson.comm;
 				subset.golden = currSetJson.comm;
 			}
-		} else if(currSetID == "swsh45") {
+		} else if(currSetID == "swsh45") {	// shining fates
 			let tempSet = JSON.parse(localStorage.getItem(lsKey + "swsh45sv"));
 			try {
 				subset.baby = tempSet.filter((card) => { return card.rarity == "Rare Shiny"; });
@@ -239,6 +245,8 @@ window.onload = () => {
 				subset.vmax = currSetJson.comm;
 				subset.golden = currSetJson.comm;
 			}
+		} else if(currSetID == "cel25") {	// celebrations classic collection
+			subset = JSON.parse(localStorage.getItem(lsKey + "cel25c"));
 		}
 		
 		// check for duplicate cards
@@ -426,6 +434,43 @@ window.onload = () => {
 				retArr.push(randCard(currSetJson.ult));
 			else
 				retArr.push(randCard(currSetJson.rare));
+			
+			return retArr;
+		};
+		
+		// custom func for celebrations since they're also weird 4 card packs
+		let celebrationsPack = () => { 
+			// 4 cards
+			// only holo or better
+			// has subset cel25c (classic collection)
+			const URperc = 4.76;
+			const holoPerc = 12.04;
+			const classicPerc = 40.16;
+			let rare = 3;
+			let classic = false;
+			let retArr = [];
+			
+			// decide whether there will be a classic collection card
+			if(randomFixed(0, 100) < classicPerc) {
+				rare = 2;
+				classic = true;
+			}
+			
+			// fill arr
+			for(let i = 0; i < rare; i++)
+				retArr.push(dupeCheck(retArr, currSetJson.rare));
+			
+			// push a classic card if necessary
+			if(classic)
+				retArr.push(randCard(Object.values(subset)));
+			
+			// fill in last card based on rarity percentages
+			if(randomFixed(0, 100) < URperc)
+				retArr.push(randCard(currSetJson.ult));
+			else if(randomFixed(0, 100) < holoPerc)
+				retArr.push(randCard(currSetJson.holo));
+			else
+				retArr.push(dupeCheck(retArr, currSetJson.rare));
 			
 			return retArr;
 		};
@@ -728,6 +773,9 @@ window.onload = () => {
 					v : 12.1, 	// data not provided, so will remain the same from previous set
 				});
 				break;
+			case "cel25":	// celebrations pull rate data from https://www.reddit.com/r/PokemonTCG/comments/q4ebn8/celebrations_pull_rates_from_778_packs/
+				packArr = celebrationsPack();
+				break;
 		}
 			
 		// clear pack innerHTML and 
@@ -812,6 +860,12 @@ window.onload = () => {
 					if(completedSets[j] == currSetID) {
 						if(packArr[i].supertype == "Energy" && packArr[i].subtypes[0] == "Basic")
 							img.classList.add("sm-energy");
+						
+						// add holo to everything in celebrations
+						if(currSetID == "cel25") {
+							div.classList.add("holo");
+							break;
+						}
 						
 						// add holo class to reverse and end holo
 						if(currSetID != "det1" && (holo && i == (packArr.length - 1) || i == (packArr.length - 2)))
