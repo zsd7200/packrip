@@ -29,13 +29,11 @@ Currently completed sets:
 - Battle Styles (swsh5)
 - Chilling Reign (swsh6)
 - Evolving Skies (swsh7)\*
-- Celebrations (cel25)\*\*
+- Celebrations (cel25)
 
 Completed sets are listed with a "✓" in the dropdown menu and have their own booster pack art. Uncompleted sets will show a default pack art and generate 11 cards at random from that set.
 
 \* - Evolving Skies is currently awaiting more data to accurately represent V and Holo Rare pulls, but should otherwise be accurate.
-
-\*\* - Celebrations is currently unfinished in the Pokémon TCG API, as it is missing all V and VMAX cards. This means that you will not be able to pull Flying Pikachu V/VMAX, Surfing Pikachu V/VMAX, Zacian V, or Zamazenta V. Should otherwise be accurate, but will update if/when more data becomes available. 
 
 ## Install
 To install and run the server locally run these commands:

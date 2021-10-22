@@ -197,11 +197,15 @@ window.onload = function () {
     currSetJson.prism = currSet.filter(function (card) {
       return card.rarity == "Rare Prism Star";
     });
-    currSetJson.v = currSet.filter(function (card) {
+    currSetJson.v = currSetID != "cel25" ? currSet.filter(function (card) {
       return card.rarity == "Rare Holo V";
+    }) : currSet.filter(function (card) {
+      return card.rarity == "V";
     });
-    currSetJson.vmax = currSet.filter(function (card) {
+    currSetJson.vmax = currSetID != "cel25" ? currSet.filter(function (card) {
       return card.rarity == "Rare Holo VMAX";
+    }) : currSet.filter(function (card) {
+      return card.rarity == "VM";
     });
     currSetJson.ult = currSet.filter(function (card) {
       return card.rarity == "Rare Ultra";
@@ -433,12 +437,17 @@ window.onload = function () {
       // 4 cards
       // only holo or better
       // has subset cel25c (classic collection)
+      var VMperc = 3.80; // averaged the 2 VM rates together
+
       var URperc = 4.76;
+      var Vperc = 6.28; // averaged the 4 V rates together
+
       var holoPerc = 12.04;
       var classicPerc = 40.16;
       var rare = 3;
       var classic = false;
-      var retArr = []; // decide whether there will be a classic collection card
+      var retArr = [];
+      console.log(currSetJson); // decide whether there will be a classic collection card
 
       if (randomFixed(0, 100) < classicPerc) {
         rare = 2;
@@ -453,7 +462,7 @@ window.onload = function () {
 
       if (classic) retArr.push(randCard(Object.values(subset))); // fill in last card based on rarity percentages
 
-      if (randomFixed(0, 100) < URperc) retArr.push(randCard(currSetJson.ult));else if (randomFixed(0, 100) < holoPerc) retArr.push(randCard(currSetJson.holo));else retArr.push(dupeCheck(retArr, currSetJson.rare));
+      if (randomFixed(0, 100) < VMperc) retArr.push(randCard(currSetJson.vmax));else if (randomFixed(0, 100) < URperc) retArr.push(randCard(currSetJson.ult));else if (randomFixed(0, 100) < Vperc) retArr.push(randCard(currSetJson.v));else if (randomFixed(0, 100) < holoPerc) retArr.push(randCard(currSetJson.holo));else retArr.push(dupeCheck(retArr, currSetJson.rare));
       return retArr;
     }; // most modern set pull rate data taken from here:
     // https://efour.proboards.com/thread/16380/pull-rates-modern-sets

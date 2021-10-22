@@ -190,8 +190,8 @@ window.onload = () => {
 		currSetJson.holo = currSet.filter((card) => { return card.rarity == "Rare Holo"; });
 		currSetJson.gx = currSet.filter((card) => { return card.rarity == "Rare Holo GX"; });
 		currSetJson.prism = currSet.filter((card) => { return card.rarity == "Rare Prism Star"; });
-		currSetJson.v = currSet.filter((card) => { return card.rarity == "Rare Holo V"; });
-		currSetJson.vmax = currSet.filter((card) => { return card.rarity == "Rare Holo VMAX"; });
+		currSetJson.v = (currSetID != "cel25") ? currSet.filter((card) => { return card.rarity == "Rare Holo V"; }) : currSet.filter((card) => { return card.rarity == "V"; });
+		currSetJson.vmax = (currSetID != "cel25") ? currSet.filter((card) => { return card.rarity == "Rare Holo VMAX"; }) : currSet.filter((card) => { return card.rarity == "VM"; });
 		currSetJson.ult = currSet.filter((card) => { return card.rarity == "Rare Ultra"; });
 		currSetJson.rain = currSet.filter((card) => { return card.rarity == "Rare Rainbow"; });
 		currSetJson.sec = currSet.filter((card) => { return card.rarity == "Rare Secret"; });
@@ -443,12 +443,15 @@ window.onload = () => {
 			// 4 cards
 			// only holo or better
 			// has subset cel25c (classic collection)
+			const VMperc = 3.80;		// averaged the 2 VM rates together
 			const URperc = 4.76;
+			const Vperc = 6.28; 		// averaged the 4 V rates together
 			const holoPerc = 12.04;
 			const classicPerc = 40.16;
 			let rare = 3;
 			let classic = false;
 			let retArr = [];
+			console.log(currSetJson);
 			
 			// decide whether there will be a classic collection card
 			if(randomFixed(0, 100) < classicPerc) {
@@ -465,8 +468,12 @@ window.onload = () => {
 				retArr.push(randCard(Object.values(subset)));
 			
 			// fill in last card based on rarity percentages
-			if(randomFixed(0, 100) < URperc)
+			if(randomFixed(0, 100) < VMperc)
+				retArr.push(randCard(currSetJson.vmax));
+			else if(randomFixed(0, 100) < URperc)
 				retArr.push(randCard(currSetJson.ult));
+			else if(randomFixed(0, 100) < Vperc)
+				retArr.push(randCard(currSetJson.v));
 			else if(randomFixed(0, 100) < holoPerc)
 				retArr.push(randCard(currSetJson.holo));
 			else
